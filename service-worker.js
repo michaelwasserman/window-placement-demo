@@ -1,9 +1,9 @@
 self.addEventListener('install', event => {
-  console.log("MSW service worker install event");
+  console.log("MSW service worker install");
 });
 
 self.addEventListener('activate', event => {
-  console.log("MSW service worker activate event");
+  console.log("MSW service worker activate");
 });
 
 self.addEventListener('message', function(event){

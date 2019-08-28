@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Window Placement API Demo</title>
+</head>
+<body>
+<div id="body-div">
+  <h3>Window Placement API Demo</h3>
+  msw@chromium.org<p>
+  <button id="open-window-button">Open window</button><p>
+  <button id="show-notification-button">Show notification</button><p>
+  <button id="request-fullscreen-button">Request fullscreen</button><p>
+  <button id="exit-fullscreen-button">Exit fullscreen</button><p>
+</div>
+
+<script>
+
+navigator.serviceWorker.register('/service-worker.js');
+
+document.getElementById('open-window-button').onclick = function() {
+  navigator.serviceWorker.controller.postMessage("Please open a window :)");
+}
+
+document.getElementById('show-notification-button').onclick = function() {
+    Notification.requestPermission(function(result) {
+        // result = 'allowed' / 'denied' / 'default'
+        if (result !== 'denied') {
+            navigator.serviceWorker.ready.then(function(registration) {
+                // Show notification. If the user clicks on this
+                // notification, then "notificationclick" is fired.
+                registration.showNotification('Open a window');
+            });
+        }
+    });
+}
+
+document.getElementById('request-fullscreen-button').onclick = function() {
+  document.body.requestFullscreen();
+}
+
+document.getElementById('exit-fullscreen-button').onclick = function() {
+  document.exitFullscreen();
+}
+
+</script>
+
+<style>
+body { background-color:whitesmoke; }
+div { background-color:lightgray; padding: 10px; }
+</style>
+
+</body></html>

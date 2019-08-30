@@ -18,7 +18,8 @@ self.addEventListener('notificationclick', function(event) {
 });
 
 function open_window(event) {
-  const promise = clients.openWindow('https://google.com');
+  const promise = clients.openWindow('https://google.com',
+                                     { x:100, y:100, width:300, height:300, state:"tab" });
   // event.waitUntil(promise);
 
   // try {

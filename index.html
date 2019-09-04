@@ -4,26 +4,21 @@
 </head>
 <body>
 <h3>Window Placement & Screen Enumeration Demo</h3>
-<button id="show-displays-button">Show displays</button><p></p>
-<button id="open-window-button">Open window</button><p></p>
-<button id="show-notification-button">Show notification</button><p></p>
-<button id="present-slides-button">Present slides</button><p></p>
-<button id="open-dashboard-button">Open dashboard</button><p></p>
-<button id="request-fullscreen-button">Request fullscreen</button><p></p>
-<button id="exit-fullscreen-button">Exit fullscreen</button><p></p>
+<div style="width:800px; padding:4px 0px;">
+<button id="open-window-button">Open window</button>
+URL:<input id="open-window-url" size="15" value="https:wikipedia.org"></input>
+Options:<input id="open-window-options" size="60" value='{"x":"50", "y":"100", "width":"400", "height":"200", "type":"window"}'></input>
+<button id="show-displays-button">Show displays</button>
+<button id="show-notification-button">Show notification</button>
+<button id="toggle-fullscreen-button">Toggle fullscreen</button>
+<button id="present-slide-button">Present slide</button>
+</div>
 <p></p>
-<!-- <div id="displays-div" style="width:100% height:30% ">
-Displays:
-</div> -->
-<canvas id="displays-canvas" width="800" height="800"></canvas>
+<canvas id="displays-canvas" width="800" height="600" style="border-style: solid"></canvas>
 
 <script>
 
 navigator.serviceWorker.register('/service-worker.js');
-
-navigator.serviceWorker.addEventListener('message', event => {
-  console.log("MSW client message:" + event.data.msg + " ... displays: " + event.displays);
-});
 
 document.getElementById('show-displays-button').onclick = function() {
   var message_channel = new MessageChannel();
@@ -42,86 +37,76 @@ document.getElementById('show-displays-button').onclick = function() {
       return;
     }
     var context = canvas.getContext('2d');
-
-    // var displays_div = document.getElementById('displays-div');
-    // while (displays_div.firstChild)
-    //   displays_div.removeChild(displays_div.firstChild);
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
     var scale = 1.0/10.0;
-    // var screen_space = 
-    // for (const display of displays) {
+    var screen_space = { left:0, top:0, right:0, bottom:0 };
+    for (const display of displays) {
+      screen_space.left = Math.min(screen_space.left, display.left);
+      screen_space.top = Math.min(screen_space.top, display.top);
+      screen_space.right = Math.max(screen_space.right, display.left + display.width);
+      screen_space.bottom = Math.max(screen_space.bottom, display.top + display.height);
+    }
+    scale = Math.min(canvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
+                     canvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top));
 
-    var colors = [ "#FF0000", "#00FF00", "#0000FF" ];
+    var colors = [ "#FF8888", "#88FF88", "#8888FF" ];
     for (i = 0; i < displays.length; ++i) {
       var display = displays[i];
-      console.log("name: " + display.name);
-      console.log("scaleFactor: " + display.scaleFactor);
-      console.log("width: " + display.width);
-      console.log("height: " + display.height);
-      console.log("left: " + display.left);
-      console.log("top: " + display.top);
-      console.log("colorDepth: " + display.colorDepth);
-      console.log("isPrimary: " + display.isPrimary);
-      console.log("isInternal: " + display.isInternal);
-      // var d = document.createElement("div");
-      // displays_div.appendChild(d);
-      // console.log("MSW " + displays_div.getBoundingClientRect().left + " " + display.left + " " + scale);
-      // d.setAttribute("style",`position:absolute;left:${displays_div.getBoundingClientRect().left+display.left*scale}px;top:${displays_div.getBoundingClientRect().left+display.top*scale}px;width:${display.width*scale}px;height:${display.height*scale}px`);
+      console.log(`[${i}] '${display.name}' ${display.left},${display.top} ${display.width}x${display.height} ${display.isPrimary ? '(Primary)': ''}`);
+      console.log(`scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth} isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`);
       context.fillStyle = colors[i%colors.length];
-      console.log("MSW fillRect: " + display.left*scale + " " + display.top*scale + " " + display.width*scale + " " + display.height*scale);
       context.fillRect(display.left*scale, display.top*scale, display.width*scale, display.height*scale);
       context.fillStyle = "#000000";
       context.font = "15px Arial";
-      context.fillText(`[${i}] ${display.left},${display.top} ${display.width}x${display.height}`, display.left*scale, display.top*scale+30);
-      context.fillText(`scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth}`, display.left*scale, display.top*scale+50);
-      context.fillText(`isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`, display.left*scale, display.top*scale+70);
-      // console.log("MSW d: " + d.getAttribute("style"))
-      // d.style.backgroundColor = "red";
-      // d.border = 3px solid #73AD21;
+      context.fillText(`[${i}] ${display.left},${display.top} ${display.width}x${display.height} ${display.isPrimary ? '(Primary)': ''}`, display.left*scale+10, display.top*scale+20);
+      context.fillText(`scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth}`, display.left*scale+10, display.top*scale+40);
+      context.fillText(`isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`, display.left*scale+10, display.top*scale+60);
     }
   };
   // Send message to service worker along with port for reply
-  navigator.serviceWorker.controller.postMessage("show-displays-button", [message_channel.port2]);
+  navigator.serviceWorker.controller.postMessage({sender:"show-displays-button"}, [message_channel.port2]);
 }
 
 document.getElementById('open-window-button').onclick = function() {
-  navigator.serviceWorker.controller.postMessage("open-window-button");
+  var url = document.getElementById('open-window-url').value;
+  var options = JSON.parse(document.getElementById('open-window-options').value);
+  navigator.serviceWorker.controller.postMessage({sender:"open-window-button", url:url, options:options});
 }
 
 document.getElementById('show-notification-button').onclick = function() {
-    Notification.requestPermission(function(result) {
-        // result = 'allowed' / 'denied' / 'default'
-        if (result !== 'denied') {
-            navigator.serviceWorker.ready.then(function(registration) {
-                // Show notification. If the user clicks on this
-                // notification, then "notificationclick" is fired.
-                registration.showNotification('Open a window');
-            });
-        }
-    });
+  Notification.requestPermission(function(result) {
+    if (result !== 'denied') { // result: 'allowed' / 'denied' / 'default'
+      navigator.serviceWorker.ready.then(function(registration) {
+        // Show notification; user clicks trigger "notificationclick".
+        registration.showNotification('Click to open a window!');
+      });
+    }
+  });
 }
 
-document.getElementById('present-slides-button').onclick = function() {
-  navigator.serviceWorker.controller.postMessage("present-slides-button");
+document.getElementById('present-slide-button').onclick = function() {
+  navigator.serviceWorker.controller.postMessage({sender:"present-slide-button"});
 }
 
-document.getElementById('open-dashboard-button').onclick = function() {
-  navigator.serviceWorker.controller.postMessage("open-dashboard-button");
-}
-
-document.getElementById('request-fullscreen-button').onclick = function() {
-  document.body.requestFullscreen();
-}
-
-document.getElementById('exit-fullscreen-button').onclick = function() {
-  document.exitFullscreen();
+var fullscreen = false;
+document.getElementById('toggle-fullscreen-button').onclick = function() {
+  if (!fullscreen) {
+    document.body.requestFullscreen();
+    fullscreen = true;
+  } else {
+    document.exitFullscreen();
+    fullscreen = false;
+  }
 }
 
 </script>
 
 <style>
-body { background-color:whitesmoke; }
-/* div { background-color:lightgray; padding: 10px; } */
+body { background-color:whitesmoke; font-family: "Arial", sans-serif; }
+div { background-color:lightgray; }
+button { background-color:rgb(149, 163, 204); border:none; padding:8px 10px; text-align:center; margin:5px; }
+input { margin:0px 5px; }
 </style>
 
 </body></html>

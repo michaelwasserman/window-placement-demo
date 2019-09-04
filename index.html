@@ -1,23 +1,91 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Window Placement API Demo</title>
+    <title>Window Placement & Screen Enumeration Demo</title>
 </head>
 <body>
-<div id="body-div">
-  <h3>Window Placement API Demo</h3>
-  msw@chromium.org<p>
-  <button id="open-window-button">Open window</button><p>
-  <button id="show-notification-button">Show notification</button><p>
-  <button id="request-fullscreen-button">Request fullscreen</button><p>
-  <button id="exit-fullscreen-button">Exit fullscreen</button><p>
-</div>
+<h3>Window Placement & Screen Enumeration Demo</h3>
+<button id="show-displays-button">Show displays</button><p></p>
+<button id="open-window-button">Open window</button><p></p>
+<button id="show-notification-button">Show notification</button><p></p>
+<button id="present-slides-button">Present slides</button><p></p>
+<button id="open-dashboard-button">Open dashboard</button><p></p>
+<button id="request-fullscreen-button">Request fullscreen</button><p></p>
+<button id="exit-fullscreen-button">Exit fullscreen</button><p></p>
+<p></p>
+<!-- <div id="displays-div" style="width:100% height:30% ">
+Displays:
+</div> -->
+<canvas id="displays-canvas" width="800" height="800"></canvas>
 
 <script>
 
 navigator.serviceWorker.register('/service-worker.js');
 
+navigator.serviceWorker.addEventListener('message', event => {
+  console.log("MSW client message:" + event.data.msg + " ... displays: " + event.displays);
+});
+
+document.getElementById('show-displays-button').onclick = function() {
+  var message_channel = new MessageChannel();
+  // Handler for recieving message reply from service worker
+  message_channel.port1.onmessage = function(event){
+    if (event.data.error) {
+      console.log("MSW client got error:" + event.data.error);
+      return;
+    }
+    var displays = event.data;
+    console.log("MSW client got displays length:" + displays.length);
+
+    var canvas = document.getElementById('displays-canvas');
+    if (!canvas.getContext) {
+      console.log("MSW no canvas context");
+      return;
+    }
+    var context = canvas.getContext('2d');
+
+    // var displays_div = document.getElementById('displays-div');
+    // while (displays_div.firstChild)
+    //   displays_div.removeChild(displays_div.firstChild);
+
+    var scale = 1.0/10.0;
+    // var screen_space = 
+    // for (const display of displays) {
+
+    var colors = [ "#FF0000", "#00FF00", "#0000FF" ];
+    for (i = 0; i < displays.length; ++i) {
+      var display = displays[i];
+      console.log("name: " + display.name);
+      console.log("scaleFactor: " + display.scaleFactor);
+      console.log("width: " + display.width);
+      console.log("height: " + display.height);
+      console.log("left: " + display.left);
+      console.log("top: " + display.top);
+      console.log("colorDepth: " + display.colorDepth);
+      console.log("isPrimary: " + display.isPrimary);
+      console.log("isInternal: " + display.isInternal);
+      // var d = document.createElement("div");
+      // displays_div.appendChild(d);
+      // console.log("MSW " + displays_div.getBoundingClientRect().left + " " + display.left + " " + scale);
+      // d.setAttribute("style",`position:absolute;left:${displays_div.getBoundingClientRect().left+display.left*scale}px;top:${displays_div.getBoundingClientRect().left+display.top*scale}px;width:${display.width*scale}px;height:${display.height*scale}px`);
+      context.fillStyle = colors[i%colors.length];
+      console.log("MSW fillRect: " + display.left*scale + " " + display.top*scale + " " + display.width*scale + " " + display.height*scale);
+      context.fillRect(display.left*scale, display.top*scale, display.width*scale, display.height*scale);
+      context.fillStyle = "#000000";
+      context.font = "15px Arial";
+      context.fillText(`[${i}] ${display.left},${display.top} ${display.width}x${display.height}`, display.left*scale, display.top*scale+30);
+      context.fillText(`scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth}`, display.left*scale, display.top*scale+50);
+      context.fillText(`isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`, display.left*scale, display.top*scale+70);
+      // console.log("MSW d: " + d.getAttribute("style"))
+      // d.style.backgroundColor = "red";
+      // d.border = 3px solid #73AD21;
+    }
+  };
+  // Send message to service worker along with port for reply
+  navigator.serviceWorker.controller.postMessage("show-displays-button", [message_channel.port2]);
+}
+
 document.getElementById('open-window-button').onclick = function() {
-  navigator.serviceWorker.controller.postMessage("Please open a window :)");
+  navigator.serviceWorker.controller.postMessage("open-window-button");
 }
 
 document.getElementById('show-notification-button').onclick = function() {
@@ -33,6 +101,14 @@ document.getElementById('show-notification-button').onclick = function() {
     });
 }
 
+document.getElementById('present-slides-button').onclick = function() {
+  navigator.serviceWorker.controller.postMessage("present-slides-button");
+}
+
+document.getElementById('open-dashboard-button').onclick = function() {
+  navigator.serviceWorker.controller.postMessage("open-dashboard-button");
+}
+
 document.getElementById('request-fullscreen-button').onclick = function() {
   document.body.requestFullscreen();
 }
@@ -45,7 +121,7 @@ document.getElementById('exit-fullscreen-button').onclick = function() {
 
 <style>
 body { background-color:whitesmoke; }
-div { background-color:lightgray; padding: 10px; }
+/* div { background-color:lightgray; padding: 10px; } */
 </style>
 
 </body></html>

@@ -13,7 +13,17 @@
 <h3 style="margin-left:20px; color:#444;">Demo: <a href="https://github.com/michaelwasserman/window-placement-demo">github.com/michaelwasserman/window-placement-demo</a></h3>
 <pre style="margin-left:30px; margin-right:30px; padding-top:10px; padding-bottom:10px; background-color:#eee">
   <a href="view-source:index.html">index.html</a>:
-  
+
+    document.getElementById('show-displays-button').onclick = async function() {
+      const displays = await navigator.screen.requestDisplays();
+      console.log("requestDisplays returned " + displays.length + " displays:");
+      for (const d of ds) {
+        console.log(`'${d.name}' ${d.left},${d.top} ${d.width}x${d.height} ` +
+                    `scaleFactor:${d.scaleFactor}, colorDepth:${d.colorDepth} ` +
+                    `isPrimary:${d.isPrimary}, isInternal:${d.isInternal}`);
+      }
+    }
+
     document.getElementById('show-notification-button').onclick = function() {
       navigator.serviceWorker.ready.then(function(registration) {
         registration.showNotification('Click to open a window!');
@@ -22,21 +32,15 @@
 
   <a href="service-worker.js">service-worker.js</a>:
 
-    async function getDisplays() {
-      const displays = await navigator.screen.requestDisplays();
-      return displays;
-    }
-
     self.addEventListener('notificationclick', async function(event) {
       event.notification.close();
-      displays = getDisplays().then(async function(displays) {
-        var options = { x:      displays[0].left,
-                        y:      displays[0].top,
-                        width:  displays[0].width,
-                        height: displays[0].height,
-                        type:  "window" }
-        clients.openWindow('https:wikipedia.org', options);
-      })
+      const displays = await navigator.screen.requestDisplays();
+      var options = { x:      displays[0].left,
+                      y:      displays[0].top,
+                      width:  displays[0].width,
+                      height: displays[0].height,
+                      type:  "window" }
+      clients.openWindow('https:wikipedia.org', options);
     });
 </pre>
 </div>

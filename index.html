@@ -20,52 +20,43 @@ Options:<input id="open-window-options" size="60" value='{"x":"50", "y":"100", "
 
 navigator.serviceWorker.register('/service-worker.js');
 
-document.getElementById('show-displays-button').onclick = function() {
-  var message_channel = new MessageChannel();
-  // Handler for recieving message reply from service worker
-  message_channel.port1.onmessage = function(event){
-    if (event.data.error) {
-      console.log("MSW client got error:" + event.data.error);
-      return;
-    }
-    var displays = event.data;
-    console.log("MSW client got displays length:" + displays.length);
+document.getElementById('show-displays-button').onclick = async function() {
+  const displays = await navigator.screen.requestDisplays();
+  console.log("navigator.screen.requestDisplays returned " + displays.length + " displays:");
+  for (const display of displays) {
+    console.log(`'${display.name}' ${display.left},${display.top} ${display.width}x${display.height} ` +
+                `scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth} ` +
+                `isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`);
+  }
 
-    var canvas = document.getElementById('displays-canvas');
-    if (!canvas.getContext) {
-      console.log("MSW no canvas context");
-      return;
-    }
-    var context = canvas.getContext('2d');
-    context.clearRect(0, 0, canvas.width, canvas.height);
+  var canvas = document.getElementById('displays-canvas');
+  var context = canvas.getContext('2d');
+  context.clearRect(0, 0, canvas.width, canvas.height);
 
-    var scale = 1.0/10.0;
-    var screen_space = { left:0, top:0, right:0, bottom:0 };
-    for (const display of displays) {
-      screen_space.left = Math.min(screen_space.left, display.left);
-      screen_space.top = Math.min(screen_space.top, display.top);
-      screen_space.right = Math.max(screen_space.right, display.left + display.width);
-      screen_space.bottom = Math.max(screen_space.bottom, display.top + display.height);
-    }
-    scale = Math.min(canvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
-                     canvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top));
+  var scale = 1.0/10.0;
+  var screen_space = { left:0, top:0, right:0, bottom:0 };
+  for (const display of displays) {
+    screen_space.left = Math.min(screen_space.left, display.left);
+    screen_space.top = Math.min(screen_space.top, display.top);
+    screen_space.right = Math.max(screen_space.right, display.left + display.width);
+    screen_space.bottom = Math.max(screen_space.bottom, display.top + display.height);
+  }
+  scale = Math.min(canvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
+                    canvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top));
 
-    var colors = [ "#FF8888", "#88FF88", "#8888FF" ];
-    for (i = 0; i < displays.length; ++i) {
-      var display = displays[i];
-      console.log(`[${i}] '${display.name}' ${display.left},${display.top} ${display.width}x${display.height} ${display.isPrimary ? '(Primary)': ''}`);
-      console.log(`scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth} isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`);
-      context.fillStyle = colors[i%colors.length];
-      context.fillRect(display.left*scale, display.top*scale, display.width*scale, display.height*scale);
-      context.fillStyle = "#000000";
-      context.font = "15px Arial";
-      context.fillText(`[${i}] ${display.left},${display.top} ${display.width}x${display.height} ${display.isPrimary ? '(Primary)': ''}`, display.left*scale+10, display.top*scale+20);
-      context.fillText(`scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth}`, display.left*scale+10, display.top*scale+40);
-      context.fillText(`isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`, display.left*scale+10, display.top*scale+60);
-    }
-  };
-  // Send message to service worker along with port for reply
-  navigator.serviceWorker.controller.postMessage({sender:"show-displays-button"}, [message_channel.port2]);
+  var colors = [ "#FF8888", "#88FF88", "#8888FF" ];
+  for (i = 0; i < displays.length; ++i) {
+    var display = displays[i];
+    console.log(`[${i}] '${display.name}' ${display.left},${display.top} ${display.width}x${display.height} ${display.isPrimary ? '(Primary)': ''}`);
+    console.log(`scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth} isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`);
+    context.fillStyle = colors[i%colors.length];
+    context.fillRect(display.left*scale, display.top*scale, display.width*scale, display.height*scale);
+    context.fillStyle = "#000000";
+    context.font = "15px Arial";
+    context.fillText(`[${i}] ${display.left},${display.top} ${display.width}x${display.height} ${display.isPrimary ? '(Primary)': ''}`, display.left*scale+10, display.top*scale+20);
+    context.fillText(`scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth}`, display.left*scale+10, display.top*scale+40);
+    context.fillText(`isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`, display.left*scale+10, display.top*scale+60);
+  }
 }
 
 document.getElementById('open-window-button').onclick = function() {

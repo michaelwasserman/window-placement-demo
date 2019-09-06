@@ -9,3 +9,9 @@ This demo depends on recent work and unmerged changes to Chrome:
   * Available on Chrome 78 Canary and Dev channels.
 * [\[WIP\] Fugu: Exploring new openWindow options](https://chromium-review.googlesource.com/c/chromium/src/+/1767282)
   * Unmerged, local build needed to call openWindow() with options.
+
+<video controls width="1280">
+    <source src="demo_screen_capture.webm" type="video/webm">
+    Sorry, your browser doesn't support embedded videos.
+</video><br>
+Demo screen capture running linux-chromeos with 2 virtual displays.

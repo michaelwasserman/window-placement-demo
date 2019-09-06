@@ -1,5 +1,7 @@
 # Window Placement and Screen Enumeration APIs Demo
 
+## Abstract
+
 This is a basic demo of the proposed
 [Screen Enumeration](https://github.com/spark008/screen-enumeration) and
 [Window Placement](https://github.com/spark008/window-placement) APIs.
@@ -10,8 +12,7 @@ This demo depends on recent work and unmerged changes to Chrome:
 * [\[WIP\] Fugu: Exploring new openWindow options](https://chromium-review.googlesource.com/c/chromium/src/+/1767282)
   * Unmerged, local build needed to call openWindow() with options.
 
-<video controls width="1280">
-    <source src="demo_screen_capture.webm" type="video/webm">
-    Sorry, your browser doesn't support embedded videos.
-</video><br>
-Demo screen capture running linux-chromeos with 2 virtual displays.
+## Screen Capture
+
+Demo screen capture: linux-chromeos with two virtual displays draws a screen-space diagram and opens windows on both displays<br>
+<a href="demo_screen_capture.webm"><img src="demo_screen_capture.png" alt="Demo Screen Capture - linux-chromeos with two virtual displays" width="1200"></a>

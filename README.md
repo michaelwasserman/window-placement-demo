@@ -8,8 +8,9 @@ This is a basic demo of the proposed
 
 This demo depends on recent work and unmerged changes to Chrome:
 * [Screen Enumeration: Basic Implementation](https://chromium-review.googlesource.com/c/chromium/src/+/1759890)
-  * Available on Chromium 78 Canary and Dev channels with a command-line switch:
-    * --enable-blink-features=ScreenEnumeration
+  * Available on Chromium 78 Canary and Dev channels with:
+    * Command-line switch: --enable-blink-features=ScreenEnumeration
+    * Or enable this flag : chrome://flags#enable-experimental-web-platform-features
 * [\[WIP\] Fugu: Exploring new openWindow options](https://chromium-review.googlesource.com/c/chromium/src/+/1767282)
   * Unmerged, local build needed to call openWindow() with options.
 

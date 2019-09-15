@@ -53,14 +53,14 @@ async function present_slide(event) {
   const slide_promise = clients.openWindow('slide.html', slide_options);
   // event.waitUntil(slide_promise);
   // TODO: opening another window clobbers the first... 
-  // const notes_promise = clients.openWindow('https://cnn.com', notes_options);
+  // const notes_promise = clients.openWindow('https://wikipedia.org', notes_options);
   // event.waitUntil(notes_promise);
 }
 
 function cautious_open_window(event) {
   try {
     console.log("INFO: calling openWindow");
-    const promise = clients.openWindow('https://google.com', { x:100, y:100, width:300, height:300, type:"window"});
+    const promise = clients.openWindow('https://wikipedia.org', { x:100, y:100, width:300, height:300, type:"window"});
     if (promise !== undefined) {
       promise.then(_ => {
         console.log("INFO: openWindow ok");

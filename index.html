@@ -4,10 +4,12 @@
 </head>
 <body>
 <h3>Window Placement & Screen Enumeration Demo</h3>
-<div style="width:800px; padding:4px 0px;">
+<div style="background-color:lightgray; width:800px; padding:5px;">
+<div style="display:flex; align-items:center;">
 <button id="open-window-button">Open window</button>
-URL:<input id="open-window-url" size="15" value="https://wikipedia.org"></input>
-Options:<input id="open-window-options" size="60" value='{"x":"50", "y":"100", "width":"400", "height":"200", "type":"window"}'></input>
+URL: <input id="open-window-url" style="flex-grow:1;" size=15 value="https://wikipedia.org"></input>
+Options: <input id="open-window-options" style="flex-grow:10;" value='{"x":"100", "y":"50", "width":"400", "height":"200", "type":"window"}'></input>
+</div>
 <button id="show-displays-button">Show displays</button>
 <button id="show-notification-button">Show notification</button>
 <button id="toggle-fullscreen-button">Toggle fullscreen</button>
@@ -95,9 +97,8 @@ document.getElementById('toggle-fullscreen-button').onclick = function() {
 
 <style>
 body { background-color:whitesmoke; font-family: "Arial", sans-serif; }
-div { background-color:lightgray; }
-button { background-color:rgb(149, 163, 204); border:none; padding:8px 10px; text-align:center; margin:5px; }
-input { margin:0px 5px; }
+button { background-color:rgb(149, 163, 204); border:none; text-align:center; padding:10px; margin:5px; }
+input { margin:5px; }
 </style>
 
 </body></html>

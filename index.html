@@ -18,7 +18,7 @@ Options:<input id="open-window-options" size="60" value='{"x":"50", "y":"100", "
 
 <script>
 
-navigator.serviceWorker.register('/service-worker.js');
+navigator.serviceWorker.register('./service-worker.js');
 
 document.getElementById('show-displays-button').onclick = async function() {
   const displays = await navigator.screen.requestDisplays();

@@ -25,11 +25,11 @@ self.addEventListener('notificationclick', async function(event) {
                   width:  displays[0].width,
                   height: displays[0].height,
                   type:  "window" }
-  clients.openWindow('https:wikipedia.org', options);
+  clients.openWindow('https://wikipedia.org', options);
 });
 
 function open_window(event) {
-  var url = 'https:wikipedia.org'
+  var url = 'https://wikipedia.org'
   var options = { x:50, y:100, width:400, height:200, type:"window"}
   if (event && event.data && event.data.url.length != 0)
     url = event.data.url;

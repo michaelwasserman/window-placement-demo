@@ -16,20 +16,24 @@ This demo depends on recent work and unmerged changes to Chrome:
 
 ## Instructions
 
-Get this demo and host it locally:
+Build the WIP Chromium window placement changes locally and run:
 ```console
-$ cd /src
-$ git clone https://github.com/michaelwasserman/window-placement-demo.git
-$ cd window-placement-demo
-$ python -m SimpleHTTPServer
-```
-
-Apply the WIP window placement changes, build and run:
-```console
-$ cd /src/chromium/src
 $ git cl patch -b wip_window_placement_api https://chromium-review.googlesource.com/c/chromium/src/+/1767282
 $ autoninja -C out/Default chrome
-$ out/Default/chrome --enable-blink-features=ScreenEnumeration -- "http://localhost:8000"
+$ out/Default/chrome --enable-blink-features=ScreenEnumeration -- "https://michaelwasserman.github.io/window-placement-demo/"
+```
+
+**[Optional]** Host this demo locally and run:
+```console
+$ git clone https://github.com/michaelwasserman/window-placement-demo.git
+$ cd window-placement-demo
+$ python -m SimpleHTTPServer &
+$ chrome --enable-blink-features=ScreenEnumeration -- "http://localhost:8000"
+```
+
+Run Chromium with the experimental switch and open this demo (GitHub or local hosting):
+```console
+$ out/Default/chrome --enable-blink-features=ScreenEnumeration -- "https://michaelwasserman.github.io/window-placement-demo/"
 ```
 
 To simulate multiple displays with [linux-chromeos](https://chromium.googlesource.com/chromiumos/docs/+/master/simple_chrome_workflow.md)

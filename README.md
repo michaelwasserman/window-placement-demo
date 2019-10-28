@@ -12,7 +12,7 @@ This is a basic demo of the proposed
 * Open windows across displays on local builds of Chromium with experimental changes:
   * [\[WIP\] Fugu: Exploring new openWindow options](https://chromium-review.googlesource.com/c/chromium/src/+/1767282)
 
-You can run the demo at michaelwasserman.github.io/window-placement-demo.
+You can run the demo at https://michaelwasserman.github.io/window-placement-demo.
 
 ## Instructions
 

@@ -6,24 +6,24 @@ This is a basic demo of the proposed
 [Screen Enumeration](https://github.com/spark008/screen-enumeration) and
 [Window Placement](https://github.com/spark008/window-placement) APIs.
 
-This demo depends on recent work and unmerged changes to Chrome:
-* [Screen Enumeration: Basic Implementation](https://chromium-review.googlesource.com/c/chromium/src/+/1759890)
-  * Available on Chromium 78 Canary and Dev channels with:
-    * Command-line switch: --enable-blink-features=ScreenEnumeration
-    * Or enable this flag : chrome://flags#enable-experimental-web-platform-features
-* [\[WIP\] Fugu: Exploring new openWindow options](https://chromium-review.googlesource.com/c/chromium/src/+/1767282)
-  * Unmerged, local build needed to call openWindow() with options.
+* Visualize the set of connected displays on Chromium 78+ with experimental flags:
+  * Enable chrome://flags#enable-experimental-web-platform-features
+  * Or run chrome --enable-blink-features=ScreenEnumeration
+* Open windows across displays on local builds of Chromium with experimental changes:
+  * [\[WIP\] Fugu: Exploring new openWindow options](https://chromium-review.googlesource.com/c/chromium/src/+/1767282)
+
+You can run the demo at michaelwasserman.github.io/window-placement-demo.
 
 ## Instructions
 
-Build the WIP Chromium window placement changes locally and run:
+Build the WIP Chromium window placement changes locally and run the demo:
 ```console
 $ git cl patch -b wip_window_placement_api https://chromium-review.googlesource.com/c/chromium/src/+/1767282
 $ autoninja -C out/Default chrome
 $ out/Default/chrome --enable-blink-features=ScreenEnumeration -- "https://michaelwasserman.github.io/window-placement-demo/"
 ```
 
-**[Optional]** Host this demo locally and run:
+**[Optional]** Host this demo locally and run it:
 ```console
 $ git clone https://github.com/michaelwasserman/window-placement-demo.git
 $ cd window-placement-demo

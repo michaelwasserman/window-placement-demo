@@ -5,59 +5,59 @@
 <body>
 <h3>Window Placement & Screen Enumeration Demo</h3>
 <div style="background-color:lightgray; width:800px; padding:5px;">
-<div style="display:flex; align-items:center;">
-<button id="open-window-button">Open window</button>
-URL: <input id="open-window-url" style="flex-grow:1;" size=15 value="https://wikipedia.org"></input>
-Options: <input id="open-window-options" style="flex-grow:10;" value='{"x":"100", "y":"50", "width":"400", "height":"200", "type":"window"}'></input>
-</div>
-<button id="show-displays-button">Show displays</button>
-<button id="show-notification-button">Show notification</button>
-<button id="toggle-fullscreen-button">Toggle fullscreen</button>
-<button id="present-slide-button">Present slide</button>
+  <div style="display:flex; align-items:center;">
+    <button id="open-window-button">Open window</button>
+    URL: <input id="open-window-url" style="flex-grow:1;" size=15 value="https://wikipedia.org"></input>
+    Options: <input id="open-window-options" style="flex-grow:10;" value='{"x":"100", "y":"50", "width":"400", "height":"200", "type":"window"}'></input>
+  </div>
+  <button id="show-screens-button">Show screens</button>
+  <button id="show-notification-button">Show notification</button>
+  <button id="toggle-fullscreen-button">Toggle fullscreen</button>
+  <button id="present-slide-button">Present slide</button>
 </div>
 <p></p>
-<canvas id="displays-canvas" width="800" height="600" style="border-style: solid"></canvas>
+<canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
 
 <script>
 
 navigator.serviceWorker.register('./service-worker.js');
 
-document.getElementById('show-displays-button').onclick = async function() {
-  const displays = await navigator.screen.requestDisplays();
-  console.log("navigator.screen.requestDisplays returned " + displays.length + " displays:");
-  for (const display of displays) {
-    console.log(`'${display.name}' ${display.left},${display.top} ${display.width}x${display.height} ` +
-                `scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth} ` +
-                `isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`);
+document.getElementById('show-screens-button').onclick = async function() {
+  const screens = await navigator.screen.getScreens();
+  console.log("navigator.screen.getScreens returned " + screens.length + " screens:");
+  for (const screen of screens) {
+    console.log(`'${screen.name}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ` +
+                `scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} ` +
+                `primary:${screen.primary}, internal:${screen.internal}`);
   }
 
-  var canvas = document.getElementById('displays-canvas');
+  var canvas = document.getElementById('screens-canvas');
   var context = canvas.getContext('2d');
   context.clearRect(0, 0, canvas.width, canvas.height);
 
   var scale = 1.0/10.0;
   var screen_space = { left:0, top:0, right:0, bottom:0 };
-  for (const display of displays) {
-    screen_space.left = Math.min(screen_space.left, display.left);
-    screen_space.top = Math.min(screen_space.top, display.top);
-    screen_space.right = Math.max(screen_space.right, display.left + display.width);
-    screen_space.bottom = Math.max(screen_space.bottom, display.top + display.height);
+  for (const screen of screens) {
+    screen_space.left = Math.min(screen_space.left, screen.left);
+    screen_space.top = Math.min(screen_space.top, screen.top);
+    screen_space.right = Math.max(screen_space.right, screen.left + screen.width);
+    screen_space.bottom = Math.max(screen_space.bottom, screen.top + screen.height);
   }
   scale = Math.min(canvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
                     canvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top));
 
   var colors = [ "#FF8888", "#88FF88", "#8888FF" ];
-  for (i = 0; i < displays.length; ++i) {
-    var display = displays[i];
-    console.log(`[${i}] '${display.name}' ${display.left},${display.top} ${display.width}x${display.height} ${display.isPrimary ? '(Primary)': ''}`);
-    console.log(`scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth} isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`);
+  for (i = 0; i < screens.length; ++i) {
+    var screen = screens[i];
+    console.log(`[${i}] '${screen.name}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`);
+    console.log(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} primary:${screen.primary}, internal:${screen.internal}`);
     context.fillStyle = colors[i%colors.length];
-    context.fillRect(display.left*scale, display.top*scale, display.width*scale, display.height*scale);
+    context.fillRect(screen.left*scale, screen.top*scale, screen.width*scale, screen.height*scale);
     context.fillStyle = "#000000";
     context.font = "15px Arial";
-    context.fillText(`[${i}] ${display.left},${display.top} ${display.width}x${display.height} ${display.isPrimary ? '(Primary)': ''}`, display.left*scale+10, display.top*scale+20);
-    context.fillText(`scaleFactor:${display.scaleFactor}, colorDepth:${display.colorDepth}`, display.left*scale+10, display.top*scale+40);
-    context.fillText(`isPrimary:${display.isPrimary}, isInternal:${display.isInternal}`, display.left*scale+10, display.top*scale+60);
+    context.fillText(`[${i}] ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`, screen.left*scale+10, screen.top*scale+20);
+    context.fillText(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth}`, screen.left*scale+10, screen.top*scale+40);
+    context.fillText(`primary:${screen.primary}, internal:${screen.internal}`, screen.left*scale+10, screen.top*scale+60);
   }
 }
 

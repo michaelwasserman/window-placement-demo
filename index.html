@@ -7,8 +7,12 @@
 <div style="background-color:lightgray; width:800px; padding:5px;">
   <div style="display:flex; align-items:center;">
     <button id="open-window-button">Open window</button>
-    URL: <input id="open-window-url" style="flex-grow:1;" size=15 value="https://wikipedia.org"></input>
-    Options: <input id="open-window-options" style="flex-grow:10;" value='{"x":"100", "y":"50", "width":"400", "height":"200", "type":"window"}'></input>
+    URL: <input id="open-window-url" style="flex-grow:1;" size=25 value="https://wikipedia.org"></input>
+    left: <input id="open-window-left" style="width:50px;" size=5 value="100" type="number"></input>
+    top: <input id="open-window-top" style="width:50px;" size=5 value="50" type="number"></input>
+    width: <input id="open-window-width" style="width:50px;" size=5 value="400" type="number"></input>
+    height: <input id="open-window-height" style="width:50px;" size=5 value="200" type="number"></input>
+    <!-- Options: <input id="open-window-options" style="flex-grow:10;" value='{"x":"100", "y":"50", "width":"400", "height":"200", "type":"window"}'></input> -->
   </div>
   <button id="show-screens-button">Show screens</button>
   <button id="show-notification-button">Show notification</button>
@@ -61,10 +65,23 @@ document.getElementById('show-screens-button').onclick = async function() {
   }
 }
 
+function getFeaturesFromOptions(options) {
+  return "left=" + options.x + ",top=" + options.y +
+         ",width=" + options.width + ",height=" + options.height;
+}
+
 document.getElementById('open-window-button').onclick = function() {
   var url = document.getElementById('open-window-url').value;
-  var options = JSON.parse(document.getElementById('open-window-options').value);
-  navigator.serviceWorker.controller.postMessage({sender:"open-window-button", url:url, options:options});
+  var options = {
+    x: document.getElementById('open-window-left').value,
+    y: document.getElementById('open-window-top').value,
+    width: document.getElementById('open-window-width').value,
+    height: document.getElementById('open-window-height').value,
+    type: "window"
+  };
+  window.open(url, '_blank', getFeaturesFromOptions(options));
+  // TODO: Support Service Worker's clients.openWindow options onces that lands.
+  // navigator.serviceWorker.controller.postMessage({sender:"open-window-button", url:url, options:options});
 }
 
 document.getElementById('show-notification-button').onclick = function() {
@@ -78,8 +95,19 @@ document.getElementById('show-notification-button').onclick = function() {
   });
 }
 
-document.getElementById('present-slide-button').onclick = function() {
-  navigator.serviceWorker.controller.postMessage({sender:"present-slide-button"});
+document.getElementById('present-slide-button').onclick = async function() {
+  const screens = await navigator.screen.getScreens();
+  var slide_options = { x:0, y:0, width:800, height:600, type:"window"};
+  var notes_options = { x:0, y:600, width:800, height:200, type:"window"};
+  if (screens && screens.length > 1) {
+    slide_options = { x:screens[1].left, y:screens[1].top, width:screens[1].width, height:screens[1].height, type:"window"};
+    notes_options = { x:screens[0].left, y:screens[0].top, width:screens[0].width, height:screens[0].height, type:"window"};
+  }
+  window.open('./slide.html', '_blank', getFeaturesFromOptions(slide_options));
+  // TODO: Open a notes window or reposition the current window.
+  // window.open('./notes.html', '_blank', getFeaturesFromOptions(options));
+  // TODO: Support Service Worker's clients.openWindow options onces that lands.
+  // navigator.serviceWorker.controller.postMessage({sender:"present-slide-button"});
 }
 
 var fullscreen = false;

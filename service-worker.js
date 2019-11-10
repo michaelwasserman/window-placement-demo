@@ -17,19 +17,21 @@ self.addEventListener('message', function(event){
 
 self.addEventListener('notificationclick', async function(event) {
   console.log("INFO: service worker notificationclick");
+  clients.openWindow('./slide.html');
   event.notification.close();
 
-  const screens = await navigator.screen.getScreens();
-  var options = { x:      screens[0].left,
-                  y:      screens[0].top,
-                  width:  screens[0].width,
-                  height: screens[0].height,
-                  type:  "window" }
-  clients.openWindow('https://wikipedia.org', options);
+  // TODO: Support Service Worker's clients.openWindow options onces that lands.
+  // const screens = await navigator.screen.getScreens();
+  // var options = { x:      screens[0].left,
+  //                 y:      screens[0].top,
+  //                 width:  screens[0].width,
+  //                 height: screens[0].height,
+  //                 type:  "window" }
+  // clients.openWindow('./slide.html', options);
 });
 
 function open_window(event) {
-  var url = 'https://wikipedia.org'
+  var url = './slide.html'
   var options = { x:50, y:100, width:400, height:200, type:"window"}
   if (event && event.data && event.data.url.length != 0)
     url = event.data.url;
@@ -53,26 +55,26 @@ async function present_slide(event) {
   const slide_promise = clients.openWindow('./slide.html', slide_options);
   // event.waitUntil(slide_promise);
   // TODO: opening another window clobbers the first... 
-  // const notes_promise = clients.openWindow('https://wikipedia.org', notes_options);
+  // const notes_promise = clients.openWindow('./slide.html', notes_options);
   // event.waitUntil(notes_promise);
 }
 
-function cautious_open_window(event) {
-  try {
-    console.log("INFO: calling openWindow");
-    const promise = clients.openWindow('https://wikipedia.org', { x:100, y:100, width:300, height:300, type:"window"});
-    if (promise !== undefined) {
-      promise.then(_ => {
-        console.log("INFO: openWindow ok");
-      }).catch(error => {
-        console.log("INFO: openWindow fail: " + error);
-      });
-    } else {
-      console.log("INFO: openWindow fail (undefined?)");
-    }
-    console.log("INFO: waiting for openWindow promise");
-    // event.waitUntil(promise);
-  } catch (error) {
-    console.log("INFO: caught error:" + error);
-  }
-}
+// function cautious_open_window(event) {
+//   try {
+//     console.log("INFO: calling openWindow");
+//     const promise = clients.openWindow('./slide.html', { x:100, y:100, width:300, height:300, type:"window"});
+//     if (promise !== undefined) {
+//       promise.then(_ => {
+//         console.log("INFO: openWindow ok");
+//       }).catch(error => {
+//         console.log("INFO: openWindow fail: " + error);
+//       });
+//     } else {
+//       console.log("INFO: openWindow fail (undefined?)");
+//     }
+//     console.log("INFO: waiting for openWindow promise");
+//     // event.waitUntil(promise);
+//   } catch (error) {
+//     console.log("INFO: caught error:" + error);
+//   }
+// }

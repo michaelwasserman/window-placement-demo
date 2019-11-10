@@ -3,15 +3,16 @@
     <title>Window Placement & Screen Enumeration Demo</title>
 </head>
 <body>
-<h3>Window Placement & Screen Enumeration Demo</h3>
+<div class="application" id="application">
+<h3>Window Placement & Screen Enumeration Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>)</h3>
 <div style="background-color:lightgray; width:800px; padding:5px;">
   <div style="display:flex; align-items:center;">
     <button id="open-window-button">Open window</button>
-    URL: <input id="open-window-url" style="flex-grow:1;" size=25 value="https://wikipedia.org"></input>
+    URL: <input id="open-window-url" style="flex-grow:1;" size=25 value="./slide.html"></input>
     left: <input id="open-window-left" style="width:50px;" size=5 value="100" type="number"></input>
     top: <input id="open-window-top" style="width:50px;" size=5 value="50" type="number"></input>
-    width: <input id="open-window-width" style="width:50px;" size=5 value="400" type="number"></input>
-    height: <input id="open-window-height" style="width:50px;" size=5 value="200" type="number"></input>
+    width: <input id="open-window-width" style="width:50px;" size=5 value="850" type="number"></input>
+    height: <input id="open-window-height" style="width:50px;" size=5 value="850" type="number"></input>
     <!-- Options: <input id="open-window-options" style="flex-grow:10;" value='{"x":"100", "y":"50", "width":"400", "height":"200", "type":"window"}'></input> -->
   </div>
   <button id="show-screens-button">Show screens</button>
@@ -21,6 +22,7 @@
 </div>
 <p></p>
 <canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
+</div>
 
 <script>
 
@@ -28,7 +30,7 @@ navigator.serviceWorker.register('./service-worker.js');
 
 document.getElementById('show-screens-button').onclick = async function() {
   const screens = await navigator.screen.getScreens();
-  console.log("navigator.screen.getScreens returned " + screens.length + " screens:");
+  console.log("INFO: getScreens returned " + screens.length + " screens:");
   for (const screen of screens) {
     console.log(`'${screen.name}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ` +
                 `scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} ` +
@@ -53,8 +55,8 @@ document.getElementById('show-screens-button').onclick = async function() {
   var colors = [ "#FF8888", "#88FF88", "#8888FF" ];
   for (i = 0; i < screens.length; ++i) {
     var screen = screens[i];
-    console.log(`[${i}] '${screen.name}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`);
-    console.log(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} primary:${screen.primary}, internal:${screen.internal}`);
+    // console.log(`[${i}] '${screen.name}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`);
+    // console.log(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} primary:${screen.primary}, internal:${screen.internal}`);
     context.fillStyle = colors[i%colors.length];
     context.fillRect(screen.left*scale, screen.top*scale, screen.width*scale, screen.height*scale);
     context.fillStyle = "#000000";
@@ -103,7 +105,9 @@ document.getElementById('present-slide-button').onclick = async function() {
     slide_options = { x:screens[1].left, y:screens[1].top, width:screens[1].width, height:screens[1].height, type:"window"};
     notes_options = { x:screens[0].left, y:screens[0].top, width:screens[0].width, height:screens[0].height, type:"window"};
   }
-  window.open('./slide.html', '_blank', getFeaturesFromOptions(slide_options));
+  var features = getFeaturesFromOptions(slide_options)
+  console.log('INFO: Opening window with feature string: ' + features);
+  window.open('./slide.html', '_blank', features);
   // TODO: Open a notes window or reposition the current window.
   // window.open('./notes.html', '_blank', getFeaturesFromOptions(options));
   // TODO: Support Service Worker's clients.openWindow options onces that lands.
@@ -113,7 +117,7 @@ document.getElementById('present-slide-button').onclick = async function() {
 var fullscreen = false;
 document.getElementById('toggle-fullscreen-button').onclick = function() {
   if (!fullscreen) {
-    document.body.requestFullscreen();
+    document.getElementsByClassName("application")[0].requestFullscreen();
     fullscreen = true;
   } else {
     document.exitFullscreen();
@@ -125,6 +129,7 @@ document.getElementById('toggle-fullscreen-button').onclick = function() {
 
 <style>
 body { background-color:whitesmoke; font-family: "Arial", sans-serif; }
+.application { background-color:whitesmoke; }
 button { background-color:rgb(149, 163, 204); border:none; text-align:center; padding:10px; margin:5px; }
 input { margin:5px; }
 </style>

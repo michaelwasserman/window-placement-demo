@@ -20,8 +20,9 @@ self.addEventListener('notificationclick', async function(event) {
   clients.openWindow('./slide.html');
   event.notification.close();
 
+  // TODO: Expose screen information for service workers?
   // TODO: Support Service Worker's clients.openWindow options onces that lands.
-  // const screens = await navigator.screen.getScreens();
+  // const screens = await self.getScreens();
   // var options = { x:      screens[0].left,
   //                 y:      screens[0].top,
   //                 width:  screens[0].width,
@@ -43,7 +44,8 @@ function open_window(event) {
 }
 
 async function present_slide(event) {
-  const screens = await navigator.screen.getScreens();
+  // TODO: Expose screen information for service workers?
+  // const screens = await self.getScreens();
   var slide_options = { x:0, y:0, width:800, height:600, type:"window"};
   var notes_options = { x:0, y:600, width:800, height:200, type:"window"};
   if (screens && screens.length > 1) {

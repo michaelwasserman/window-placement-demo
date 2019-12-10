@@ -29,7 +29,7 @@
 navigator.serviceWorker.register('./service-worker.js');
 
 document.getElementById('show-screens-button').onclick = async function() {
-  const screens = await navigator.screen.getScreens();
+  const screens = await self.getScreens();
   console.log("INFO: getScreens returned " + screens.length + " screens:");
   for (const screen of screens) {
     console.log(`'${screen.name}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ` +
@@ -98,7 +98,7 @@ document.getElementById('show-notification-button').onclick = function() {
 }
 
 document.getElementById('present-slide-button').onclick = async function() {
-  const screens = await navigator.screen.getScreens();
+  const screens = await self.getScreens();
   var slide_options = { x:0, y:0, width:800, height:600, type:"window"};
   var notes_options = { x:0, y:600, width:800, height:200, type:"window"};
   if (screens && screens.length > 1) {
@@ -108,6 +108,7 @@ document.getElementById('present-slide-button').onclick = async function() {
   var features = getFeaturesFromOptions(slide_options)
   console.log('INFO: Opening window with feature string: ' + features);
   window.open('./slide.html', '_blank', features);
+  // TODO: Make the slide window fullscreen.
   // TODO: Open a notes window or reposition the current window.
   // window.open('./notes.html', '_blank', getFeaturesFromOptions(options));
   // TODO: Support Service Worker's clients.openWindow options onces that lands.

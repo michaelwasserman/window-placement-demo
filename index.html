@@ -18,7 +18,10 @@
   <button id="show-screens-button">Show screens</button>
   <button id="show-notification-button">Show notification</button>
   <button id="toggle-fullscreen-button">Toggle fullscreen</button>
-  <button id="present-slide-button">Present slide</button>
+  <button id="open-slide-window-button">Open slide window</button>
+  <button id="fullscreen-slide-iframe-button">Fullscreen slide iframe
+    <iframe id="slide-iframe" src="./slide.html"></iframe>
+  </button>
 </div>
 <p></p>
 <canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
@@ -97,7 +100,18 @@ document.getElementById('show-notification-button').onclick = function() {
   });
 }
 
-document.getElementById('present-slide-button').onclick = async function() {
+var fullscreen = false;
+document.getElementById('toggle-fullscreen-button').onclick = async function() {
+  if (!fullscreen) {
+    document.getElementById('application').requestFullscreen();
+    fullscreen = true;
+  } else {
+    document.exitFullscreen();
+    fullscreen = false;
+  }
+}
+
+document.getElementById('open-slide-window-button').onclick = async function() {
   const screens = await self.getScreens();
   var slide_options = { x:0, y:0, width:800, height:600, type:"window"};
   var notes_options = { x:0, y:600, width:800, height:200, type:"window"};
@@ -106,24 +120,27 @@ document.getElementById('present-slide-button').onclick = async function() {
     notes_options = { x:screens[0].left, y:screens[0].top, width:screens[0].width, height:screens[0].height, type:"window"};
   }
   var features = getFeaturesFromOptions(slide_options)
+  // TODO: Re-enable and use the fullscreen feature string option?
   console.log('INFO: Opening window with feature string: ' + features);
-  window.open('./slide.html', '_blank', features);
-  // TODO: Make the slide window fullscreen.
+  var slideshow = window.open('./slide.html', '_blank', features);
+  // TODO: Make the slide window fullscreen; this doesn't seem to work:
+  slideshow.document.body.requestFullscreen();
   // TODO: Open a notes window or reposition the current window.
   // window.open('./notes.html', '_blank', getFeaturesFromOptions(options));
   // TODO: Support Service Worker's clients.openWindow options onces that lands.
-  // navigator.serviceWorker.controller.postMessage({sender:"present-slide-button"});
+  // navigator.serviceWorker.controller.postMessage({sender:"open-slide-window-button"});
 }
 
-var fullscreen = false;
-document.getElementById('toggle-fullscreen-button').onclick = function() {
-  if (!fullscreen) {
-    document.getElementsByClassName("application")[0].requestFullscreen();
-    fullscreen = true;
-  } else {
-    document.exitFullscreen();
-    fullscreen = false;
+document.getElementById('fullscreen-slide-iframe-button').onclick = async function() {
+  let fullscreenOptions = {
+    navigationUI: "auto"
+  };
+  const screens = await self.getScreens();
+  if (screens && screens.length > 1) {
+    console.log('Info: Requesting Fullscreen on secondary screen.');
+    fullscreenOptions.screen = screens[1];
   }
+  document.getElementById('slide-iframe').requestFullscreen(fullscreenOptions);
 }
 
 </script>
@@ -132,6 +149,7 @@ document.getElementById('toggle-fullscreen-button').onclick = function() {
 body { background-color:whitesmoke; font-family: "Arial", sans-serif; }
 .application { background-color:whitesmoke; }
 button { background-color:rgb(149, 163, 204); border:none; text-align:center; padding:10px; margin:5px; }
+iframe { width:5px; height:5px; }
 input { margin:5px; }
 </style>
 

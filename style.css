@@ -1,0 +1,6 @@
+body { background-color:whitesmoke; font-family: "Arial", sans-serif; }
+.application { background-color:whitesmoke; }
+.controls {background-color:lightgray; width:800px; padding:5px; }
+button { background-color:rgb(149, 163, 204); border:none; text-align:center; padding:10px; margin:5px; }
+iframe { width:5px; height:5px; }
+input { margin:5px; }

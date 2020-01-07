@@ -13,27 +13,31 @@ async function showScreens() {
 
   var scale = 1.0/10.0;
   var screen_space = { left:0, top:0, right:0, bottom:0 };
+  var origin = { left:screens[0].left, top:screens[0].top };
   for (const screen of screens) {
     screen_space.left = Math.min(screen_space.left, screen.left);
     screen_space.top = Math.min(screen_space.top, screen.top);
     screen_space.right = Math.max(screen_space.right, screen.left + screen.width);
     screen_space.bottom = Math.max(screen_space.bottom, screen.top + screen.height);
+    origin.left = Math.min(origin.left, screen.left);
+    origin.top = Math.min(origin.top, screen.top);
   }
   scale = Math.min(canvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
-                    canvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top));
+                   canvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top));
 
   var colors = [ "#FF8888", "#88FF88", "#8888FF" ];
   for (i = 0; i < screens.length; ++i) {
     var screen = screens[i];
     // console.log(`[${i}] '${screen.name}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`);
     // console.log(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} primary:${screen.primary}, internal:${screen.internal}`);
+    var rect = { left:(screen.left-origin.left)*scale, top:(screen.top-origin.top)*scale, width:screen.width*scale, height:screen.height*scale };
     context.fillStyle = colors[i%colors.length];
-    context.fillRect(screen.left*scale, screen.top*scale, screen.width*scale, screen.height*scale);
+    context.fillRect(rect.left, rect.top, rect.width, rect.height);
     context.fillStyle = "#000000";
     context.font = "15px Arial";
-    context.fillText(`[${i}] ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`, screen.left*scale+10, screen.top*scale+20);
-    context.fillText(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth}`, screen.left*scale+10, screen.top*scale+40);
-    context.fillText(`primary:${screen.primary}, internal:${screen.internal}`, screen.left*scale+10, screen.top*scale+60);
+    context.fillText(`[${i}] ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`, rect.left+10, rect.top+20);
+    context.fillText(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth}`, rect.left+10, rect.top+40);
+    context.fillText(`primary:${screen.primary}, internal:${screen.internal}`, rect.left+10, rect.top+60);
   }
 }
 

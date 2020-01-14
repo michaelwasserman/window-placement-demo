@@ -1,4 +1,9 @@
 async function showScreens() {
+  if (!('getScreens' in self)) {
+    console.error("getScreens() not found; please see https://github.com/michaelwasserman/window-placement-demo#instructions");
+    return;
+  }
+
   const screens = await self.getScreens();
   console.log("INFO: getScreens returned " + screens.length + " screens:");
   for (const screen of screens) {
@@ -131,6 +136,9 @@ window.onload = () => {
   document.getElementById("toggle-fullscreen").addEventListener('click', toggleFullscreen);
   document.getElementById("open-slide-window").addEventListener('click', openSlideWindow);
   document.getElementById("fullscreen-slide").addEventListener('click', fullscreenSlide);
+
+  if ('onscreenschange' in window)
+    window.addEventListener('screenschange', showScreens);
 
   showScreens();
 }

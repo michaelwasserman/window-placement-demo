@@ -1,0 +1,14 @@
+{
+  "name": "Screen Enumeration & Window Placement Demo",
+  "short_name": "Screen & Window Demo",
+  "icons": [{
+      "src": "favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }],
+  "lang": "en-US",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#757575",
+  "theme_color": "#757575"
+}

@@ -1,12 +1,21 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Window Placement & Screen Enumeration Demo</title>
-    <link rel="stylesheet" href="style.css">
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Screen Enumeration & Window Placement Demo</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <meta name="theme-color" content="#757575"/>
+  <meta name="msapplication-TileImage" content="favicon-512.png">
+  <meta name="msapplication-TileColor" content="#757575">
 </head>
 <body>
 
 <div class="application" id="application">
-<h3>Window Placement & Screen Enumeration Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>)</h3>
+<h3>Screen Enumeration & Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>)</h3>
+<h4 id="enable-features" class="nav-element" hidden=true style="color: red;">
+  Please enable chrome://flags#enable-experimental-web-platform-features
+</h4>
 <div class="controls">
   <div style="display:flex; align-items:center;">
     <button id="open-window">Open window</button>
@@ -17,7 +26,7 @@
     height: <input id="open-window-height" style="width:50px;" size=5 value="850" type="number"></input>
     <!-- Options: <input id="open-window-options" style="flex-grow:10;" value='{"x":"100", "y":"50", "width":"400", "height":"200", "type":"window"}'></input> -->
   </div>
-  <button id="show-screens">Show screens</button>
+  <!-- <button id="show-screens">Show screens</button> -->
   <button id="show-notification">Show notification</button>
   <button id="toggle-fullscreen">Toggle fullscreen</button>
   <button id="open-slide-window">Open slide window</button>

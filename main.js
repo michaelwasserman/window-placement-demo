@@ -1,12 +1,11 @@
 async function showScreens() {
-  if (!('getScreens' in self)) {
-    console.error("getScreens() not found; please see https://github.com/michaelwasserman/window-placement-demo#instructions");
-    return;
-  }
-
-  const screens = await self.getScreens();
-  console.log("INFO: getScreens returned " + screens.length + " screens:");
+  const screens = ('getScreens' in self) ? await getScreens() : [ window.screen ];
+  console.log("INFO: Able to detect " + screens.length + " screens:");
   for (const screen of screens) {
+    if (screen.left === undefined)
+      screen.left = screen.availLeft;
+    if (screen.top === undefined)
+      screen.top = screen.availTop;
     console.log(`'${screen.name}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ` +
                 `scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} ` +
                 `primary:${screen.primary}, internal:${screen.internal}`);
@@ -33,8 +32,6 @@ async function showScreens() {
   var colors = [ "#FF8888", "#88FF88", "#8888FF" ];
   for (i = 0; i < screens.length; ++i) {
     var screen = screens[i];
-    // console.log(`[${i}] '${screen.name}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`);
-    // console.log(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} primary:${screen.primary}, internal:${screen.internal}`);
     var rect = { left:(screen.left-origin.left)*scale, top:(screen.top-origin.top)*scale, width:screen.width*scale, height:screen.height*scale };
     context.fillStyle = colors[i%colors.length];
     context.fillRect(rect.left, rect.top, rect.width, rect.height);
@@ -60,9 +57,8 @@ function openWindow() {
     height: document.getElementById('open-window-height').value,
     type: "window"
   };
+  // TODO: Support openWindow(options) if available.
   window.open(url, '_blank', getFeaturesFromOptions(options));
-  // TODO: Support Service Worker's clients.openWindow options onces that lands.
-  // navigator.serviceWorker.controller.postMessage({sender:"open-window-button", url:url, options:options});
 }
 
 function showNotification() {
@@ -84,7 +80,7 @@ async function toggleFullscreen() {
 }
 
 async function openSlideWindow() {
-  const screens = await self.getScreens();
+  const screens = ('getScreens' in self) ? await self.getScreens() : [ window.screen ];
   var slide_options = { x:0, y:0, width:800, height:600, type:"window"};
   var notes_options = { x:0, y:600, width:800, height:200, type:"window"};
   if (screens && screens.length > 1) {
@@ -99,13 +95,11 @@ async function openSlideWindow() {
   slideshow.document.body.requestFullscreen();
   // TODO: Open a notes window or reposition the current window.
   // window.open('./notes.html', '_blank', getFeaturesFromOptions(options));
-  // TODO: Support Service Worker's clients.openWindow options onces that lands.
-  // navigator.serviceWorker.controller.postMessage({sender:"open-slide-window-button"});
 }
 
 async function fullscreenSlide() {
   let fullscreenOptions = { navigationUI: "auto" };
-  const screens = await self.getScreens();
+  const screens = ('getScreens' in self) ? await getScreens() : [ window.screen ];
   if (screens && screens.length > 1) {
     console.log('Info: Requesting fullscreen on opposite screen.');
     for (s of screens) {
@@ -129,9 +123,14 @@ window.onload = () => {
   if ('serviceWorker' in navigator)
     navigator.serviceWorker.register('./sw.js');
 
+  if (!('getScreens' in self)) {
+    document.getElementById("enable-features").hidden = false;
+    console.error("chrome://flags#enable-experimental-web-platform-features");
+  }
+
   // Handle control button clicks and input events.
   document.getElementById("open-window").addEventListener('click', openWindow);
-  document.getElementById("show-screens").addEventListener('click', showScreens);
+  // document.getElementById("show-screens").addEventListener('click', showScreens);
   document.getElementById("show-notification").addEventListener('click', showNotification);
   document.getElementById("toggle-fullscreen").addEventListener('click', toggleFullscreen);
   document.getElementById("open-slide-window").addEventListener('click', openSlideWindow);

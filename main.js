@@ -6,7 +6,7 @@ async function showScreens() {
       screen.left = screen.availLeft;
     if (screen.top === undefined)
       screen.top = screen.availTop;
-    console.log(`'${screen.name}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ` +
+    console.log(`'${screen.id}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ` +
                 `scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} ` +
                 `primary:${screen.primary}, internal:${screen.internal}`);
   }
@@ -37,7 +37,7 @@ async function showScreens() {
     context.fillRect(rect.left, rect.top, rect.width, rect.height);
     context.fillStyle = "#000000";
     context.font = "15px Arial";
-    context.fillText(`[${i}] ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`, rect.left+10, rect.top+20);
+    context.fillText(`[${screen.id}] ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`, rect.left+10, rect.top+20);
     context.fillText(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth}`, rect.left+10, rect.top+40);
     context.fillText(`primary:${screen.primary}, internal:${screen.internal}`, rect.left+10, rect.top+60);
   }

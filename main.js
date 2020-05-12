@@ -1,5 +1,15 @@
+async function getScreensWithWarningAndFallback() {
+  var screens = ('getScreens' in self) ? await getScreens() : [ window.screen ];
+  if (screens.length == 0) {
+    document.getElementById("allow-permission").hidden = false;
+    console.error("Window Placement permission denied");
+    screens = [ window.screen ];
+  }
+  return screens;
+}
+
 async function showScreens() {
-  const screens = ('getScreens' in self) ? await getScreens() : [ window.screen ];
+  const screens = await getScreensWithWarningAndFallback();
   console.log("INFO: Able to detect " + screens.length + " screens:");
   for (const screen of screens) {
     if (screen.left === undefined)
@@ -8,11 +18,12 @@ async function showScreens() {
       screen.top = screen.availTop;
     console.log(`'${screen.id}' ${screen.left},${screen.top} ${screen.width}x${screen.height} ` +
                 `scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} ` +
-                `primary:${screen.primary}, internal:${screen.internal}`);
+                `primary:${screen.primary}, internal:${screen.internal},` +
+                `touchSupport:${screen.touchSupport}`);
   }
 
-  var canvas = document.getElementById('screens-canvas');
-  var context = canvas.getContext('2d');
+  const canvas = document.getElementById('screens-canvas');
+  const context = canvas.getContext('2d');
   context.clearRect(0, 0, canvas.width, canvas.height);
 
   var scale = 1.0/10.0;
@@ -29,10 +40,10 @@ async function showScreens() {
   scale = Math.min(canvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
                    canvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top));
 
-  var colors = [ "#FF8888", "#88FF88", "#8888FF" ];
+  const colors = [ "#FF8888", "#88FF88", "#8888FF" ];
   for (i = 0; i < screens.length; ++i) {
-    var screen = screens[i];
-    var rect = { left:(screen.left-origin.left)*scale, top:(screen.top-origin.top)*scale, width:screen.width*scale, height:screen.height*scale };
+    const screen = screens[i];
+    const rect = { left:(screen.left-origin.left)*scale, top:(screen.top-origin.top)*scale, width:screen.width*scale, height:screen.height*scale };
     context.fillStyle = colors[i%colors.length];
     context.fillRect(rect.left, rect.top, rect.width, rect.height);
     context.fillStyle = "#000000";
@@ -49,8 +60,8 @@ function getFeaturesFromOptions(options) {
 }
 
 function openWindow() {
-  var url = document.getElementById('open-window-url').value;
-  var options = {
+  const url = document.getElementById('open-window-url').value;
+  const options = {
     x: document.getElementById('open-window-left').value,
     y: document.getElementById('open-window-top').value,
     width: document.getElementById('open-window-width').value,
@@ -80,17 +91,17 @@ async function toggleFullscreen() {
 }
 
 async function openSlideWindow() {
-  const screens = ('getScreens' in self) ? await self.getScreens() : [ window.screen ];
+  const screens = await getScreensWithWarningAndFallback();
   var slide_options = { x:0, y:0, width:800, height:600, type:"window"};
   var notes_options = { x:0, y:600, width:800, height:200, type:"window"};
   if (screens && screens.length > 1) {
     slide_options = { x:screens[1].left, y:screens[1].top, width:screens[1].width, height:screens[1].height, type:"window"};
     notes_options = { x:screens[0].left, y:screens[0].top, width:screens[0].width, height:screens[0].height, type:"window"};
   }
-  var features = getFeaturesFromOptions(slide_options)
+  const features = getFeaturesFromOptions(slide_options)
   // TODO: Re-enable and use the fullscreen feature string option?
   console.log('INFO: Opening window with feature string: ' + features);
-  var slideshow = window.open('./slide.html', '_blank', features);
+  const slideshow = window.open('./slide.html', '_blank', features);
   // TODO: Make the slide window fullscreen; this doesn't seem to work:
   slideshow.document.body.requestFullscreen();
   // TODO: Open a notes window or reposition the current window.
@@ -98,8 +109,8 @@ async function openSlideWindow() {
 }
 
 async function fullscreenSlide() {
+  const screens = await getScreensWithWarningAndFallback();
   let fullscreenOptions = { navigationUI: "auto" };
-  const screens = ('getScreens' in self) ? await getScreens() : [ window.screen ];
   if (screens && screens.length > 1) {
     console.log('Info: Requesting fullscreen on opposite screen.');
     for (s of screens) {

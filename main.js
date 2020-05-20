@@ -92,17 +92,19 @@ async function toggleFullscreen() {
 
 async function openSlideWindow() {
   const screens = await getScreensWithWarningAndFallback();
-  var slide_options = { x:0, y:0, width:800, height:600, type:"window"};
-  var notes_options = { x:0, y:600, width:800, height:200, type:"window"};
+  var slide_options = { x:0, y:0, width:800, height:600 };
+  var notes_options = { x:0, y:600, width:800, height:200 };
   if (screens && screens.length > 1) {
-    slide_options = { x:screens[1].left, y:screens[1].top, width:screens[1].width, height:screens[1].height, type:"window"};
-    notes_options = { x:screens[0].left, y:screens[0].top, width:screens[0].width, height:screens[0].height, type:"window"};
+    slide_options = { x:screens[1].availLeft, y:screens[1].availTop,
+                      width:screens[1].availWidth, height:screens[1].availHeight };
+    notes_options = { x:screens[0].availLeft, y:screens[0].availTop,
+                      width:screens[0].availWidth, height:screens[0].availHeight };
   }
   const features = getFeaturesFromOptions(slide_options)
   // TODO: Re-enable and use the fullscreen feature string option?
   console.log('INFO: Opening window with feature string: ' + features);
   const slideshow = window.open('./slide.html', '_blank', features);
-  // TODO: Make the slide window fullscreen; this doesn't seem to work:
+  // TODO: Make the slide window fullscreen; this doesn't currently work:
   slideshow.document.body.requestFullscreen();
   // TODO: Open a notes window or reposition the current window.
   // window.open('./notes.html', '_blank', getFeaturesFromOptions(options));
@@ -112,12 +114,9 @@ async function fullscreenSlide() {
   const screens = await getScreensWithWarningAndFallback();
   let fullscreenOptions = { navigationUI: "auto" };
   if (screens && screens.length > 1) {
-    console.log('Info: Requesting fullscreen on opposite screen.');
+    console.log('Info: Requesting fullscreen on another screen.');
     for (s of screens) {
-      if (s.left > window.screenLeft + window.outerWidth || 
-          s.left + s.width < window.screenLeft || 
-          s.top > window.screenTop + window.outerHeight ||
-          s.top + s.height < window.screenTop) {
+      if (s.left != window.screen.left || s.top != window.screen.top) {
         fullscreenOptions.screen = s;
         break;
       }

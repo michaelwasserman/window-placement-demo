@@ -4,44 +4,25 @@
 </head>
 <body>
 <div style="text-align:center;">
-<div style="background-color:lightgrey; display:inline-block; text-align:left; width:800px;">
+<div style="background-color:lightgrey; display:inline-block; text-align:left; width:700px;">
 <h1 style="margin-top:40px; margin-left:20px;">Window Placement & Screen Enumeration</h1>
-<h2 style="margin-left:20px;">Eng: msw@, PM: nattestad@</h2>
 <h3 style="margin-left:20px; color:#444;">Screen Enumeration: <a href="https://github.com/webscreens/screen-enumeration">github.com/webscreens/screen-enumeration</a></h3>
 <h3 style="margin-left:20px; color:#444;">Window Placement: <a href="https://github.com/webscreens/window-placement">github.com/webscreens/window-placement</a></h3>
-<p style="margin-left:50px; margin-right:50px; color:#555;">Abstract: As it becomes more common to use more than one monitor, it becomes more important to give Web developers the tools to make their applications perform well across multiple displays with differing properties...</p>
+<p style="margin-left:50px; margin-right:50px; color:#555;">Abstract: As multi-display computing becomes a more common and critical part of user experiences, it becomes more important to give web developers information and tools to leverage that expanded visual environment.</p>
 <h3 style="margin-left:20px; color:#444;">Demo: <a href="https://github.com/michaelwasserman/window-placement-demo">github.com/michaelwasserman/window-placement-demo</a></h3>
 <pre style="margin-left:30px; margin-right:30px; padding-top:10px; padding-bottom:10px; background-color:#eee">
-  <a href="view-source:index.html">index.html</a>:
-
-    document.getElementById('show-screens-button').onclick = async function() {
-      const screens = await self.getScreens();
-      console.log("getScreens returned " + screens.length + " screens:");
-      for (const s of screens) {
-        console.log(`'${s.name}' ${s.left},${s.top} ${s.width}x${s.height} ` +
-                    `scaleFactor:${s.scaleFactor}, colorDepth:${s.colorDepth} ` +
-                    `primary:${s.primary}, internal:${s.internal}`);
-      }
+  document.getElementById('show-slides').onclick = async function() {
+    const screens = await self.getScreens();
+    let fullscreenOptions = { navigationUI: "auto" };
+    console.log("Info: getScreens returned " + screens.length + " screens:");
+    for (s of screens) {
+      console.log(`[${s.id}] ${s.left},${s.top} ${s.width}x${s.height} ` +
+                  `primary:${s.primary}, internal:${s.internal}`);
+      if (s.left != window.screen.left || s.top != window.screen.top)
+        fullscreenOptions.screen = s;
     }
-
-    document.getElementById('show-notification-button').onclick = function() {
-      navigator.serviceWorker.ready.then(function(registration) {
-        registration.showNotification('Click to open a window!');
-      });
-    }
-
-  <a href="service-worker.js">service-worker.js</a>:
-
-    self.addEventListener('notificationclick', async function(event) {
-      event.notification.close();
-      const screens = await navigator.screen.getScreens();
-      var options = { x:      screens[0].left,
-                      y:      screens[0].top,
-                      width:  screens[0].width,
-                      height: screens[0].height,
-                      type:  "window" };
-      clients.openWindow('https:wikipedia.org', options);
-    });
+    document.getElementById('slides').requestFullscreen(fullscreenOptions);
+  }
 </pre>
 </div>
 </div>

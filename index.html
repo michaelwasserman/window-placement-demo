@@ -29,13 +29,26 @@
     height: <input id="open-window-height" style="width:50px;" size=5 value="525" type="number"></input>
     <!-- Options: <input id="open-window-options" style="flex-grow:10;" value='{"x":"100", "y":"50", "width":"400", "height":"200", "type":"window"}'></input> -->
   </div>
-  <!-- <button id="show-screens">Show screens</button> -->
+  <button id="update-screens">Update screens</button>
+  <!-- <button id="open-windows">Open <input id="open-windows-count" style="width:20px;padding:0px;margin:0px" size=2 value="5" type="number" min=1 max=9></input> windows</button> -->
   <button id="show-notification">Show notification</button>
   <button id="toggle-fullscreen">Toggle fullscreen</button>
-  <button id="open-slide-window">Open slide window</button>
-  <button id="fullscreen-slide">Fullscreen slide
-    <iframe id="slide" src="./slide.html"></iframe>
-  </button>
+  <div class="dropdown">
+    <button id="open-slide-and-notes-windows">Open slide & notes</button>
+    <div class="dropdown-content">
+      <button id="open-slide-window">Slide window</button>
+      <button id="open-notes-window">Notes window</button>
+    </div>
+  </div>
+  <div class="dropdown">
+    <button id="fullscreen-slide">Fullscreen slide
+      <iframe id="slide" src="./slide.html"></iframe>
+    </button>
+    <div class="dropdown-content" id="fullscreen-slide-dropdown">
+      <button id="fullscreen-on-current-screen">Current screen</button>
+      <button id="get-screens">Get screens</button>
+    </div>
+  </div>
 </div>
 <p></p>
 <canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>

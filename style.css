@@ -2,5 +2,20 @@ body { background-color:whitesmoke; font-family: "Arial", sans-serif; }
 .application { background-color:whitesmoke; }
 .controls {background-color:lightgray; width:800px; padding:5px; }
 button { background-color:rgb(149, 163, 204); border:none; text-align:center; padding:10px; margin:5px; }
+button:hover { background-color: rgb(123, 134, 168); }
 iframe { width:5px; height:5px; }
 input { margin:5px; }
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 130px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.dropdown:hover .dropdown-content { display: block; }

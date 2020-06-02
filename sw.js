@@ -3,6 +3,8 @@ var filesToCache = [
   'index.html',
   'style.css',
   'main.js',
+  'notes.html',
+  'popup.html',
   'slide.html',
   'favicon-512.png',
 ];

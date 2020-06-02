@@ -1,4 +1,4 @@
-# Window Placement and Screen Enumeration APIs Demo
+# Screen Enumeration & Window Placement APIs Demo
 
 ## Abstract
 
@@ -12,14 +12,14 @@ This is a basic demo of the proposed
 
 Run the demo at https://michaelwasserman.github.io/window-placement-demo
 * Enable chrome://flags#enable-experimental-web-platform-features
-* Or run chrome --enable-blink-features=ScreenEnumeration,WindowPlacement
+* Or run chrome --enable-experimental-web-platform-features
 
 **[Optional]** Host this demo locally and run it:
 ```console
 $ git clone https://github.com/michaelwasserman/window-placement-demo.git
 $ cd window-placement-demo
 $ python -m SimpleHTTPServer &
-$ chrome --enable-blink-features=ScreenEnumeration,WindowPlacement -- "http://localhost:8000"
+$ chrome --enable-experimental-web-platform-features -- "http://localhost:8000"
 ```
 
 To simulate multiple displays with
@@ -27,7 +27,7 @@ To simulate multiple displays with
 builds, use
 [--ash-host-window-bounds](https://cs.chromium.org/chromium/src/ui/display/display_switches.cc?type=cs&q=ash-host-window-bounds&sq=package:chromium&g=0&l=34-40):
 ```console
-$ out/cros_Default/chrome --enable-blink-features=ScreenEnumeration --ash-host-window-bounds=1280x960,1285+0-1280x960 -- "http://localhost:8000"
+$ out/cros_Default/chrome --enable-experimental-web-platform-features --ash-host-window-bounds=1280x960,1285+0-1280x960 -- "http://localhost:8000"
 ```
 
 ## Screen Capture

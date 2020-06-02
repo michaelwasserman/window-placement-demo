@@ -55,6 +55,10 @@ async function showScreens(screens) {
     context.fillText(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth}`, rect.left+10, rect.top+40);
     context.fillText(`primary:${screen.primary}, internal:${screen.internal}`, rect.left+10, rect.top+60);
   }
+
+  const rect = { left:(window.screenLeft-origin.left)*scale, top:(window.screenTop-origin.top)*scale, width:window.outerWidth*scale, height:window.outerHeight*scale };
+  context.strokeRect(rect.left, rect.top, rect.width, rect.height);
+  context.fillText(`window ${window.screenLeft},${window.screenTop} ${window.outerWidth}x${window.outerHeight}`, rect.left+10, rect.top+rect.height-10);
 }
 
 async function updateScreens() {
@@ -64,11 +68,13 @@ async function updateScreens() {
   if ('onscreenschange' in window && !window.onscreenschange)
     window.addEventListener('screenschange', updateScreens);
 
-  let buttons = `<button onclick="fullscreenSlide()">Current Screen</button>` +
-                `<button onclick="updateScreens()">Get Screens</button>`;
-  for (s of screens)
-    buttons += s == window.screen ? `` : `<button onclick="fullscreenSlide(${s.id})"> Screen ${s.id}</button>`;
-  document.getElementById("fullscreen-slide-dropdown").innerHTML = buttons;
+  if (document.getElementById("fullscreen-slide-dropdown")) {
+    let buttons = `<button onclick="fullscreenSlide()">Current Screen</button>` +
+                  `<button onclick="updateScreens()">Get Screens</button>`;
+    for (s of screens)
+      buttons += s == window.screen ? `` : `<button onclick="fullscreenSlide(${s.id})"> Screen ${s.id}</button>`;
+    document.getElementById("fullscreen-slide-dropdown").innerHTML = buttons;
+  }
 
   return screens;
 }
@@ -196,32 +202,4 @@ async function fullscreenSlide(screenId) {
       fullscreenOptions.screen = screens[0];
   }
   document.getElementById('slide').requestFullscreen(fullscreenOptions);
-}
-
-window.onload = () => {
-  'use strict';
-
-  if ('serviceWorker' in navigator)
-    navigator.serviceWorker.register('./sw.js');
-
-  if (!('getScreens' in self)) {
-    document.getElementById("enable-features").hidden = false;
-    console.error("chrome://flags#enable-experimental-web-platform-features");
-  }
-
-  // Handle control button clicks and input events.
-  document.getElementById("open-window").addEventListener('click', openWindow);
-  // document.getElementById("open-windows").addEventListener('click', openWindows);
-  document.getElementById("update-screens").addEventListener('click', updateScreens);
-  document.getElementById("show-notification").addEventListener('click', showNotification);
-  document.getElementById("toggle-fullscreen").addEventListener('click', toggleFullscreen);
-  document.getElementById("open-slide-window").addEventListener('click', openSlideWindow);
-  document.getElementById("open-notes-window").addEventListener('click', openNotesWindow);
-  document.getElementById("open-slide-and-notes-windows").addEventListener('click', openSlideAndNotesWindows);
-  document.getElementById("fullscreen-slide").addEventListener('click', () => { fullscreenSlide(null) });
-  document.getElementById("fullscreen-on-current-screen").addEventListener('click', () => { fullscreenSlide(null) });
-  document.getElementById("get-screens").addEventListener('click', updateScreens);
-
-  // TODO: Consider requesting permission for getScreens on load?
-  showScreens([window.screen]);
 }

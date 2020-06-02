@@ -1,13 +1,10 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title>Screen Enumeration & Window Placement Demo</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <meta name="theme-color" content="#757575"/>
-  <meta name="msapplication-TileImage" content="favicon-512.png">
-  <meta name="msapplication-TileColor" content="#757575">
 </head>
 <body>
 
@@ -22,11 +19,11 @@
 <div class="controls">
   <div style="display:flex; align-items:center;">
     <button id="open-window">Open window</button>
-    URL: <input id="open-window-url" style="flex-grow:1;" size=25 value="./slide.html"></input>
+    URL: <input id="open-window-url" style="flex-grow:1;" size=25 value="./popup.html"></input>
     left: <input id="open-window-left" style="width:50px;" size=5 value="100" type="number"></input>
     top: <input id="open-window-top" style="width:50px;" size=5 value="50" type="number"></input>
-    width: <input id="open-window-width" style="width:50px;" size=5 value="720" type="number"></input>
-    height: <input id="open-window-height" style="width:50px;" size=5 value="525" type="number"></input>
+    width: <input id="open-window-width" style="width:50px;" size=5 value="830" type="number"></input>
+    height: <input id="open-window-height" style="width:50px;" size=5 value="750" type="number"></input>
     <!-- Options: <input id="open-window-options" style="flex-grow:10;" value='{"x":"100", "y":"50", "width":"400", "height":"200", "type":"window"}'></input> -->
   </div>
   <button id="update-screens">Update screens</button>
@@ -42,7 +39,7 @@
   </div>
   <div class="dropdown">
     <button id="fullscreen-slide">Fullscreen slide
-      <iframe id="slide" src="./slide.html"></iframe>
+      <iframe id="slide" class="slide" src="./slide.html"></iframe>
     </button>
     <div class="dropdown-content" hidden=true id="fullscreen-slide-dropdown">
       <button id="fullscreen-on-current-screen">Current screen</button>
@@ -54,7 +51,41 @@
 <canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
 </div>
 
+<!-- Testing of iframe functionality and permissions: 
+  <iframe src="https://michaelwasserman.github.io/window-placement-demo/" style="width:800; height:600;" allow="fullscreen"></iframe>
+  <iframe src="https://permission.site" style="width:800; height:600;" allow="fullscreen,geolocation"></iframe>
+-->
+
 <script src="main.js"></script>
+<script>
+window.onload = () => {
+  'use strict';
+
+  if ('serviceWorker' in navigator)
+    navigator.serviceWorker.register('./sw.js');
+
+  if (!('getScreens' in self)) {
+    document.getElementById("enable-features").hidden = false;
+    console.error("chrome://flags#enable-experimental-web-platform-features");
+  }
+
+  // Handle control button clicks and input events.
+  document.getElementById("open-window").addEventListener('click', openWindow);
+  // document.getElementById("open-windows").addEventListener('click', openWindows);
+  document.getElementById("update-screens").addEventListener('click', updateScreens);
+  document.getElementById("show-notification").addEventListener('click', showNotification);
+  document.getElementById("toggle-fullscreen").addEventListener('click', toggleFullscreen);
+  document.getElementById("open-slide-window").addEventListener('click', openSlideWindow);
+  document.getElementById("open-notes-window").addEventListener('click', openNotesWindow);
+  document.getElementById("open-slide-and-notes-windows").addEventListener('click', openSlideAndNotesWindows);
+  document.getElementById("fullscreen-slide").addEventListener('click', () => { fullscreenSlide(null) });
+  document.getElementById("fullscreen-on-current-screen").addEventListener('click', () => { fullscreenSlide(null) });
+  document.getElementById("get-screens").addEventListener('click', updateScreens);
+
+  // TODO: Consider requesting permission for getScreens on load?
+  showScreens([window.screen]);
+}
+</script>
 
 </body>
 </html>

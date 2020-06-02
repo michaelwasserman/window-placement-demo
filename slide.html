@@ -1,11 +1,12 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>Slide: Window Placement & Screen Enumeration</title>
+<!DOCTYPE html><html lang="en">
+<head>
+  <title>Slide: Screen Enumeration & Window Placement</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div style="text-align:center;">
 <div style="background-color:lightgrey; display:inline-block; text-align:left; width:700px;">
-<h1 style="margin-top:40px; margin-left:20px;">Window Placement & Screen Enumeration</h1>
+<h1 style="margin-top:40px; margin-left:20px;">Screen Enumeration & Window Placement</h1>
 <h3 style="margin-left:20px; color:#444;">Screen Enumeration: <a href="https://github.com/webscreens/screen-enumeration">github.com/webscreens/screen-enumeration</a></h3>
 <h3 style="margin-left:20px; color:#444;">Window Placement: <a href="https://github.com/webscreens/window-placement">github.com/webscreens/window-placement</a></h3>
 <p style="margin-left:50px; margin-right:50px; color:#555;">Abstract: As multi-display computing becomes a more common and critical part of user experiences, it becomes more important to give web developers information and tools to leverage that expanded visual environment.</p>
@@ -18,7 +19,7 @@
     for (s of screens) {
       console.log(`[${s.id}] ${s.left},${s.top} ${s.width}x${s.height} ` +
                   `primary:${s.primary}, internal:${s.internal}`);
-      if (s.left != window.screen.left || s.top != window.screen.top)
+      if (!s.internal)
         fullscreenOptions.screen = s;
     }
     document.getElementById('slides').requestFullscreen(fullscreenOptions);
@@ -27,10 +28,5 @@
 </div>
 </div>
 
-<style>
-body { background-color:whitesmoke; font-family: "Arial", sans-serif; }
-button { background-color:rgb(149, 163, 204); border:none; padding:8px 10px; text-align:center; margin:5px; }
-input { margin:0px 5px; }
-</style>
-
-</body></html>
+</body>
+</html>

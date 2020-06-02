@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <title>Popup: Screen Enumeration & Window Placement</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="application" id="application">
+<h3>Screen Enumeration & Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>)</h3>
+<h4 id="enable-features" class="nav-element" hidden=true style="color: red;">
+  Please enable chrome://flags#enable-experimental-web-platform-features
+</h4>
+<h4 id="allow-permission" class="nav-element" hidden=true style="color: red;">
+  Please allow the Window Placement permission for full demo functionality
+</h4>
+<div class="controls">
+  <div style="display:flex; align-items:center;">
+    <button id="update-screens">Update screens</button>
+    <button id="move-to">Move window to</button>
+    left: <input id="move-to-left" style="width:50px;" size=5 value="100" type="number"></input>
+    top: <input id="move-to-top" style="width:50px;" size=5 value="50" type="number"></input>
+    <button id="resize-to">Resize window to</button>
+    width: <input id="resize-to-width" style="width:50px;" size=5 value="720" type="number"></input>
+    height: <input id="resize-to-height" style="width:50px;" size=5 value="525" type="number"></input>
+  </div>
+</div>
+<p></p>
+<canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
+</div>
+
+<script src="main.js"></script>
+<script>
+window.onload = () => {
+  'use strict';
+
+  if (!('getScreens' in self)) {
+    document.getElementById("enable-features").hidden = false;
+    console.error("chrome://flags#enable-experimental-web-platform-features");
+  }
+
+  document.getElementById('move-to-left').value = window.screenLeft;
+  document.getElementById('move-to-top').value = window.screenTop;
+  document.getElementById('resize-to-width').value = window.outerWidth;
+  document.getElementById('resize-to-height').value = window.outerHeight;
+
+  // Handle control button clicks and input events.
+  document.getElementById("update-screens").addEventListener('click', updateScreens);
+  document.getElementById("move-to").addEventListener('click', () => {
+    window.moveTo(document.getElementById('move-to-left').value, document.getElementById('move-to-top').value);
+    updateScreens();
+  });
+  document.getElementById("resize-to").addEventListener('click', () => {
+    window.resizeTo(document.getElementById('resize-to-width').value, document.getElementById('resize-to-height').value);
+    updateScreens();
+  });
+
+  // TODO: Consider requesting permission for getScreens on load?
+  showScreens([window.screen]);
+}
+</script>
+
+</body>
+</html>

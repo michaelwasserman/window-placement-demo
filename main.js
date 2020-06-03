@@ -1,7 +1,7 @@
 async function getScreensWithWarningAndFallback() {
   var screens = ('getScreens' in self) ? await getScreens() : [ window.screen ];
 
-  if (screens.length == 0) {
+  if (!screens || screens.length == 0) {
     document.getElementById("allow-permission").hidden = false;
     console.error("Window Placement permission denied");
     screens = [ window.screen ];

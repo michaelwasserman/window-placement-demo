@@ -7,12 +7,7 @@
 
 <div class="application" id="application">
 <h3>Screen Enumeration & Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>)</h3>
-<h4 id="enable-features" class="nav-element" hidden=true style="color: red;">
-  Please enable chrome://flags#enable-experimental-web-platform-features
-</h4>
-<h4 id="allow-permission" class="nav-element" hidden=true style="color: red;">
-  Please allow the Window Placement permission for full demo functionality
-</h4>
+<h4 id="warning" hidden=true style="color: red;"></h4>
 <div class="controls">
   <div style="display:flex; align-items:center;">
     <button id="update-screens">Update screens</button>
@@ -30,14 +25,8 @@
 
 <script src="main.js"></script>
 <script>
-window.onload = () => {
-  'use strict';
-
-  if (!('getScreens' in self)) {
-    document.getElementById("enable-features").hidden = false;
-    console.error("chrome://flags#enable-experimental-web-platform-features");
-  }
-
+'use strict';
+window.addEventListener('load', () => {
   document.getElementById('move-to-left').value = window.screenLeft;
   document.getElementById('move-to-top').value = window.screenTop;
   document.getElementById('resize-to-width').value = window.outerWidth;
@@ -56,7 +45,7 @@ window.onload = () => {
 
   // TODO: Consider requesting permission for getScreens on load?
   showScreens([window.screen]);
-}
+});
 </script>
 
 </body>

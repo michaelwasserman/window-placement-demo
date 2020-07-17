@@ -1,18 +1,41 @@
-async function getScreensWithWarningAndFallback() {
-  var screens = ('getScreens' in self) ? await getScreens() : [ window.screen ];
+'use strict';
 
-  if (!screens || screens.length == 0) {
-    document.getElementById("allow-permission").hidden = false;
-    console.error("Window Placement permission denied");
-    screens = [ window.screen ];
+function showWarning(text) {
+  let warning = document.getElementById("warning");
+  if (warning) {
+    warning.hidden = false;
+    warning.innerText = text;
+  }
+  console.error(text);
+}
+
+window.addEventListener('load', async () => {
+  if (!('getScreens' in self)) {
+    showWarning("Please enable chrome://flags#enable-experimental-web-platform-features");
+  } else if (!('isMultiScreen' in self)) {
+    showWarning("Please use a newer version of Chrome for full demo functionality");
+  } else if (!(await isMultiScreen())) {
+    // TODO: Update this warning with screenschange events.
+    showWarning("Please use multiple screens for full demo functionality");
+  }
+});
+
+async function getScreensWithWarningAndFallback() {
+  let screens = [ window.screen ];
+  if ('getScreens' in self) {
+    try {
+      screens = await getScreens();
+    } catch {
+      showWarning("Please allow the Window Placement permission for full demo functionality");
+    }
   }
 
   console.log("INFO: Able to detect " + screens.length + " screen(s):");
   for (const screen of screens) {
     console.log(`[${screen.id ? screen.id : "window.screen"}] ` + 
-                `${screen.left},${screen.top} ${screen.width}x${screen.height} ` +
-                `scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth} ` +
-                `primary:${screen.primary}, internal:${screen.internal},` +
+                `(${screen.left},${screen.top} ${screen.width}x${screen.height}) ` +
+                `scaleFactor:${screen.scaleFactor} colorDepth:${screen.colorDepth} ` +
+                `primary:${screen.primary} internal:${screen.internal} ` +
                 `touchSupport:${screen.touchSupport}`);
   }
 
@@ -31,20 +54,20 @@ async function showScreens(screens) {
   const context = canvas.getContext('2d');
   context.clearRect(0, 0, canvas.width, canvas.height);
 
-  var scale = 1.0/10.0;
-  var screen_space = { left:0, top:0, right:0, bottom:0 };
+  let scale = 1.0/10.0;
+  let screen_space = { left:0, top:0, right:0, bottom:0 };
   for (const screen of screens) {
     screen_space.left = Math.min(screen_space.left, screen.left);
     screen_space.top = Math.min(screen_space.top, screen.top);
     screen_space.right = Math.max(screen_space.right, screen.left + screen.width);
     screen_space.bottom = Math.max(screen_space.bottom, screen.top + screen.height);
   }
-  var origin = { left:screen_space.left, top:screen_space.top };
+  let origin = { left:screen_space.left, top:screen_space.top };
   scale = Math.min(canvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
                    canvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top),
                    0.5);
   const colors = [ "#FF8888", "#88FF88", "#8888FF" ];
-  for (i = 0; i < screens.length; ++i) {
+  for (let i = 0; i < screens.length; ++i) {
     const screen = screens[i];
     const rect = { left:(screen.left-origin.left)*scale, top:(screen.top-origin.top)*scale, width:screen.width*scale, height:screen.height*scale };
     context.fillStyle = colors[i%colors.length];
@@ -71,7 +94,7 @@ async function updateScreens() {
   if (document.getElementById("fullscreen-slide-dropdown")) {
     let buttons = `<button onclick="fullscreenSlide()">Current Screen</button>` +
                   `<button onclick="updateScreens()">Get Screens</button>`;
-    for (s of screens)
+    for (let s of screens)
       buttons += s == window.screen ? `` : `<button onclick="fullscreenSlide(${s.id})"> Screen ${s.id}</button>`;
     document.getElementById("fullscreen-slide-dropdown").innerHTML = buttons;
   }
@@ -98,7 +121,7 @@ function openWindow() {
 
 // TODO: Add some worthwhile multi-window opening example?
 // async function openWindows() {
-//   var count = document.getElementById('open-windows-count').value;
+//   let count = document.getElementById('open-windows-count').value;
 //   const screens = await updateScreens();
 //   const per_screen = Math.ceil(count / screens.length);
 //   console.log(`MSW: openWindows count:${count}, screens:${screens.length}, per_screen:${per_screen}`);
@@ -141,7 +164,7 @@ async function toggleFullscreen() {
 
 async function openSlideWindow() {
   const screens = await updateScreens();
-  var options = { x:screen.availLeft, y:screen.availTop,
+  let options = { x:screen.availLeft, y:screen.availTop,
                   width:screen.availWidth, height:screen.availHeight/2 };
   if (screens && screens.length > 1) {
     options = { x:screens[1].availLeft, y:screens[1].availTop,
@@ -152,14 +175,14 @@ async function openSlideWindow() {
   console.log('INFO: Opening window with feature string: ' + features);
   const slide_window = window.open('./slide.html', '_blank', features);
   // TODO: Make the window fullscreen; this doesn't currently work:
-  slide_window.document.body.requestFullscreen();
+  // slide_window.document.body.requestFullscreen();
   // TODO: Open another window or reposition the current window.
   // window.open('./notes.html', '_blank', getFeaturesFromOptions(options));
 }
 
 async function openNotesWindow() {
   const screens = await updateScreens();
-  var options = { x:screen.availLeft, y:screen.availTop+screen.availHeight/2,
+  let options = { x:screen.availLeft, y:screen.availTop+screen.availHeight/2,
                   width:screen.availWidth, height:screen.availHeight/2 };
   if (screens && screens.length > 1) {
     options = { x:screens[0].availLeft, y:screens[0].availTop,
@@ -170,7 +193,7 @@ async function openNotesWindow() {
   console.log('INFO: Opening window with feature string: ' + features);
   const notes_window = window.open('./notes.html', '_blank', features);
   // TODO: Make the window fullscreen; this doesn't currently work:
-  notes_window.document.body.requestFullscreen();
+  // notes_window.document.body.requestFullscreen();
   // TODO: Open another window or reposition the current window.
   // window.open('./slides.html', '_blank', getFeaturesFromOptions(options));
 }

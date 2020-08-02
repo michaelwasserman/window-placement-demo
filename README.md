@@ -1,10 +1,9 @@
-# Screen Enumeration & Window Placement APIs Demo
+# Multi-Screen Window Placement Demo
 
 ## Abstract
 
 This is a basic demo of the proposed
-[Screen Enumeration](https://github.com/spark008/screen-enumeration) and
-[Window Placement](https://github.com/spark008/window-placement) APIs.
+[Multi-Screen Window Placement](https://github.com/webscreens/window-placement) APIs.
 * Visualize the set of connected displays on Chromium 78+
 * Open windows across displays on Chromium 80.0.3965.0+
 

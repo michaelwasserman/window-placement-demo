@@ -1,6 +1,6 @@
 {
-  "name": "Screen Enumeration & Window Placement Demo",
-  "short_name": "Screen & Window Demo",
+  "name": "Multi-Screen Window Placement Demo",
+  "short_name": "Window Placement Demo",
   "icons": [{
       "src": "favicon-512.png",
       "sizes": "512x512",

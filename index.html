@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <title>Screen Enumeration & Window Placement Demo</title>
+  <title>Multi-Screen Window Placement Demo</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
@@ -9,7 +9,7 @@
 <body>
 
 <div class="application" id="application">
-<h3>Screen Enumeration & Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>)</h3>
+<h3>Multi-Screen Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>)</h3>
 <h4 id="warning" hidden=true style="color: red;"></h4>
 <div class="controls">
   <div style="display:flex; align-items:center;">
@@ -70,8 +70,6 @@ window.addEventListener('load', () => {
   document.getElementById("fullscreen-slide").addEventListener('click', () => { fullscreenSlide(null) });
   document.getElementById("fullscreen-on-current-screen").addEventListener('click', () => { fullscreenSlide(null) });
   document.getElementById("get-screens").addEventListener('click', updateScreens);
-
-  showScreens([window.screen]);
 });
 </script>
 

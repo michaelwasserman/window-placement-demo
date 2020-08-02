@@ -12,22 +12,30 @@ function showWarning(text) {
 window.addEventListener('load', async () => {
   if (!('getScreens' in self)) {
     showWarning("Please enable chrome://flags#enable-experimental-web-platform-features");
-  } else if (!('isMultiScreen' in self)) {
-    showWarning("Please use a newer version of Chrome for full demo functionality");
-  } else if (!(await isMultiScreen())) {
+  } else if ('isMultiScreen' in self && !(await isMultiScreen())) {
     // TODO: Update this warning with screenschange events.
     showWarning("Please use multiple screens for full demo functionality");
   }
+  updateScreens(/*requestPermission=*/false);
 });
 
-async function getScreensWithWarningAndFallback() {
+async function getScreensWithWarningAndFallback(requestPermission) {
   let screens = [ window.screen ];
   if ('getScreens' in self) {
-    try {
-      screens = await getScreens();
-    } catch {
+    let permissionStatus = await navigator.permissions.query({name:'window-placement'});
+    if (permissionStatus.state === 'granted' ||
+        (permissionStatus.state === 'prompt' && requestPermission)) {
+      try {
+        screens = await getScreens();
+        if (document.getElementById("warning"))
+          document.getElementById("warning").hidden = true;
+      } catch {
+        showWarning("Please allow the Window Placement permission for full demo functionality");
+      }
+    } else if (permissionStatus.state === 'denied') {
       showWarning("Please allow the Window Placement permission for full demo functionality");
     }
+    permissionStatus.onchange = updateScreens(/*requestPermission=*/false);
   }
 
   console.log("INFO: Able to detect " + screens.length + " screen(s):");
@@ -84,8 +92,8 @@ async function showScreens(screens) {
   context.fillText(`window ${window.screenLeft},${window.screenTop} ${window.outerWidth}x${window.outerHeight}`, rect.left+10, rect.top+rect.height-10);
 }
 
-async function updateScreens() {
-  const screens = await getScreensWithWarningAndFallback();
+async function updateScreens(requestPermission = true) {
+  const screens = await getScreensWithWarningAndFallback(requestPermission);
   showScreens(screens);
 
   if ('onscreenschange' in window && !window.onscreenschange)

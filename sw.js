@@ -1,5 +1,6 @@
 let cacheName = 'screen-and-window-demo';
 let filesToCache = [
+  '.',
   'favicon-512.png',
   'favicon.ico',
   'index.html',

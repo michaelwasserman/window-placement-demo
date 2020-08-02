@@ -19,8 +19,6 @@ window.addEventListener('load', async () => {
   } else {
     let permission = await navigator.permissions.query({name:'window-placement'});
     permission.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
-    if (permission.state === 'denied')
-      showWarning("Please allow the Window Placement permission for full demo functionality");
   }
   if ('onscreenschange' in self)
     addEventListener('screenschange', () => { updateScreens(/*requestPermission=*/false); });

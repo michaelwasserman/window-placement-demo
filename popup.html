@@ -36,11 +36,11 @@ window.addEventListener('load', () => {
   document.getElementById("update-screens").addEventListener('click', updateScreens);
   document.getElementById("move-to").addEventListener('click', () => {
     window.moveTo(document.getElementById('move-to-left').value, document.getElementById('move-to-top').value);
-    updateScreens();
+    updateScreens(/*requestPermission=*/false);
   });
   document.getElementById("resize-to").addEventListener('click', () => {
     window.resizeTo(document.getElementById('resize-to-width').value, document.getElementById('resize-to-height').value);
-    updateScreens();
+    updateScreens(/*requestPermission=*/false);
   });
 });
 </script>

@@ -3,10 +3,11 @@
 function showWarning(text) {
   let warning = document.getElementById("warning");
   if (warning) {
-    warning.hidden = false;
+    warning.hidden = !text;
     warning.innerText = text;
   }
-  console.error(text);
+  if (text)
+    console.error(text);
 }
 
 window.addEventListener('load', async () => {
@@ -15,27 +16,27 @@ window.addEventListener('load', async () => {
   } else if ('isMultiScreen' in self && !(await isMultiScreen())) {
     // TODO: Update this warning with screenschange events.
     showWarning("Please use multiple screens for full demo functionality");
+  } else {
+    let permission = await navigator.permissions.query({name:'window-placement'});
+    permission.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
+    if (permission.state === 'denied')
+      showWarning("Please allow the Window Placement permission for full demo functionality");
   }
+  if ('onscreenschange' in self)
+    addEventListener('screenschange', () => { updateScreens(/*requestPermission=*/false); });
   updateScreens(/*requestPermission=*/false);
 });
 
 async function getScreensWithWarningAndFallback(requestPermission) {
   let screens = [ window.screen ];
   if ('getScreens' in self) {
-    let permissionStatus = await navigator.permissions.query({name:'window-placement'});
-    if (permissionStatus.state === 'granted' ||
-        (permissionStatus.state === 'prompt' && requestPermission)) {
-      try {
-        screens = await getScreens();
-        if (document.getElementById("warning"))
-          document.getElementById("warning").hidden = true;
-      } catch {
-        showWarning("Please allow the Window Placement permission for full demo functionality");
-      }
-    } else if (permissionStatus.state === 'denied') {
+    let permission = await navigator.permissions.query({name:'window-placement'});
+    if (permission.state === 'granted' || (permission.state === 'prompt' && requestPermission))
+      screens = (await getScreens().catch(()=>{})) || [ window.screen ];
+    if (screens.length >= 1 && screens[0] !== window.screen)
+      showWarning();  // Clear any warning.
+    else if (requestPermission || permission.state === 'denied')
       showWarning("Please allow the Window Placement permission for full demo functionality");
-    }
-    permissionStatus.onchange = updateScreens(/*requestPermission=*/false);
   }
 
   console.log("INFO: Able to detect " + screens.length + " screen(s):");
@@ -96,9 +97,6 @@ async function updateScreens(requestPermission = true) {
   const screens = await getScreensWithWarningAndFallback(requestPermission);
   showScreens(screens);
 
-  if ('onscreenschange' in window && !window.onscreenschange)
-    window.addEventListener('screenschange', updateScreens);
-
   if (document.getElementById("fullscreen-slide-dropdown")) {
     let buttons = `<button onclick="fullscreenSlide()">Current Screen</button>` +
                   `<button onclick="updateScreens()">Get Screens</button>`;
@@ -130,7 +128,7 @@ function openWindow() {
 // TODO: Add some worthwhile multi-window opening example?
 // async function openWindows() {
 //   let count = document.getElementById('open-windows-count').value;
-//   const screens = await updateScreens();
+//   const screens = await updateScreens(/*requestPermission=*/false);
 //   const per_screen = Math.ceil(count / screens.length);
 //   console.log(`MSW: openWindows count:${count}, screens:${screens.length}, per_screen:${per_screen}`);
 //   for (const s of screens) {
@@ -171,7 +169,7 @@ async function toggleFullscreen() {
 }
 
 async function openSlideWindow() {
-  const screens = await updateScreens();
+  const screens = await updateScreens(/*requestPermission=*/false);
   let options = { x:screen.availLeft, y:screen.availTop,
                   width:screen.availWidth, height:screen.availHeight/2 };
   if (screens && screens.length > 1) {
@@ -189,7 +187,7 @@ async function openSlideWindow() {
 }
 
 async function openNotesWindow() {
-  const screens = await updateScreens();
+  const screens = await updateScreens(/*requestPermission=*/false);
   let options = { x:screen.availLeft, y:screen.availTop+screen.availHeight/2,
                   width:screen.availWidth, height:screen.availHeight/2 };
   if (screens && screens.length > 1) {
@@ -220,7 +218,7 @@ async function fullscreenSlide(screenId) {
   }
 
   let fullscreenOptions = { navigationUI: "auto" };
-  const screens = await updateScreens();
+  const screens = await updateScreens(/*requestPermission=*/false);
   if (screens && screens.length > 1) {
     console.log('Info: Requesting fullscreen on another screen.');
     for (const s of screens) {

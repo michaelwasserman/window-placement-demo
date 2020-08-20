@@ -208,7 +208,7 @@ async function openSlideAndNotesWindows() {
 }
 
 async function fullscreenSlide(screenId) {
-  if (!screenId) {
+  if (screenId == undefined) {
     // TODO: Choose another screen?
     // (s.left != window.screen.left || s.top != window.screen.top)
     document.getElementById('slide').requestFullscreen(); 

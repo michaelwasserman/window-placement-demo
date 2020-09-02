@@ -148,16 +148,16 @@ function openWindow() {
 //   }
 // }
 
-function showNotification() {
-  Notification.requestPermission(function(result) {
-    if (result !== 'denied') { // result: 'allowed' / 'denied' / 'default'
-      navigator.serviceWorker.ready.then(function(registration) {
-        // Show notification; user clicks trigger "notificationclick".
-        registration.showNotification('Click to open a window!');
-      });
-    }
-  });
-}
+// function showNotification() {
+//   Notification.requestPermission(function(result) {
+//     if (result !== 'denied') { // result: 'allowed' / 'denied' / 'default'
+//       navigator.serviceWorker.ready.then(function(registration) {
+//         // Show notification; user clicks trigger "notificationclick".
+//         registration.showNotification('Click to open a window!');
+//       });
+//     }
+//   });
+// }
 
 async function toggleFullscreen() {
   if (document.fullscreenElement)

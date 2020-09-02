@@ -12,7 +12,7 @@ function showWarning(text) {
 
 window.addEventListener('load', async () => {
   if (!('getScreens' in self)) {
-    showWarning("Please enable chrome://flags#enable-experimental-web-platform-features");
+    showWarning("Please use Chrome 86+ to demo new multi-screen features");
   } else if ('isMultiScreen' in self && !(await isMultiScreen())) {
     // TODO: Update this warning with screenschange events.
     showWarning("Please use multiple screens for full demo functionality");
@@ -199,7 +199,7 @@ async function openNotesWindow() {
   // TODO: Make the window fullscreen; this doesn't currently work:
   // notes_window.document.body.requestFullscreen();
   // TODO: Open another window or reposition the current window.
-  // window.open('./slides.html', '_blank', getFeaturesFromOptions(options));
+  // window.open('./slide.html', '_blank', getFeaturesFromOptions(options));
 }
 
 async function openSlideAndNotesWindows() {

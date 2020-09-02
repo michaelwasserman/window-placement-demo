@@ -1,10 +1,11 @@
 body { background-color:whitesmoke; font-family: "Arial", sans-serif; }
 .application { background-color:whitesmoke; }
-.controls {background-color:lightgray; width:800px; padding:5px; }
+.controls { background-color:lightgray; width:800px; padding:5px; }
 button { background-color:rgb(149, 163, 204); border:none; text-align:center; padding:10px; margin:5px; }
 button:hover { background-color: rgb(123, 134, 168); }
 iframe { width:800px; height:600px; }
-.slide { width:5px; height:5px; }
+.slide { visibility:collapse; width:0px; height:0px; margin:0px; padding:0px; border:0px; }
+.slide:fullscreen { visibility:visible; }
 input { margin:5px; }
 
 .dropdown {
@@ -19,4 +20,5 @@ input { margin:5px; }
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
 }
-.dropdown:hover .dropdown-content { display: block; }
+.dropdown:hover .dropdown-content { display:block; }
+.dropdown:focus-within .dropdown-content { display:block; }

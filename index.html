@@ -28,10 +28,16 @@
   <button id="update-screens">Update screens</button>
   <!-- <button id="open-windows">Open <input id="open-windows-count" style="width:20px;padding:0px;margin:0px" size=2 value="5" type="number" min=1 max=9></input> windows</button> -->
   <!-- <button id="show-notification">Show notification</button> -->
-  <button id="toggle-fullscreen">Toggle fullscreen</button>
+  <div class="dropdown">
+    <button id="toggle-fullscreen">Toggle fullscreen</button>
+    <div class="dropdown-content" hidden=true id="toggle-fullscreen-dropdown">
+      <button id="toggle-fullscreen-on-current-screen">Current screen</button>
+      <button id="toggle-fullscreen-get-screens">Get screens</button>
+    </div>
+  </div>
   <div class="dropdown">
     <button id="open-slide-and-notes-windows">Open slide & notes</button>
-    <div class="dropdown-content" hidden=true>
+    <div class="dropdown-content" hidden=true id="open-slide-and-notes-windows-dropdown">
       <button id="open-slide-window">Slide window</button>
       <button id="open-notes-window">Notes window</button>
     </div>
@@ -41,8 +47,8 @@
       <iframe id="slide" class="slide" src="./slide.html"></iframe>
     </button>
     <div class="dropdown-content" hidden=true id="fullscreen-slide-dropdown">
-      <button id="fullscreen-on-current-screen">Current screen</button>
-      <button id="get-screens">Get screens</button>
+      <button id="fullscreen-slide-on-current-screen">Current screen</button>
+      <button id="fullscreen-slide-get-screens">Get screens</button>
     </div>
   </div>
 </div>
@@ -50,7 +56,7 @@
 <canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
 </div>
 
-<!-- Testing of iframe functionality and permissions: 
+<!-- Testing of iframe functionality and permissions:
   <iframe src="https://michaelwasserman.github.io/window-placement-demo/" style="width:800; height:600;" allow="fullscreen"></iframe>
   <iframe src="https://permission.site" style="width:800; height:600;" allow="fullscreen,geolocation"></iframe>
 -->
@@ -68,12 +74,14 @@ window.addEventListener('load', () => {
   document.getElementById("update-screens").addEventListener('click', updateScreens);
   // document.getElementById("show-notification").addEventListener('click', showNotification);
   document.getElementById("toggle-fullscreen").addEventListener('click', toggleFullscreen);
+  document.getElementById("toggle-fullscreen-on-current-screen").addEventListener('click', toggleFullscreen);
+  document.getElementById("toggle-fullscreen-get-screens").addEventListener('click', updateScreens);
   document.getElementById("open-slide-window").addEventListener('click', openSlideWindow);
   document.getElementById("open-notes-window").addEventListener('click', openNotesWindow);
   document.getElementById("open-slide-and-notes-windows").addEventListener('click', openSlideAndNotesWindows);
-  document.getElementById("fullscreen-slide").addEventListener('click', () => { fullscreenSlide(null) });
-  document.getElementById("fullscreen-on-current-screen").addEventListener('click', () => { fullscreenSlide(null) });
-  document.getElementById("get-screens").addEventListener('click', updateScreens);
+  document.getElementById("fullscreen-slide").addEventListener('click', fullscreenSlide);
+  document.getElementById("fullscreen-slide-on-current-screen").addEventListener('click', fullscreenSlide);
+  document.getElementById("fullscreen-slide-get-screens").addEventListener('click', updateScreens);
 });
 </script>
 

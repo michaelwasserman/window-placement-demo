@@ -1,5 +1,8 @@
 'use strict';
 
+let permissionStatus = null;
+let screensInterface = null;
+
 function showWarning(text) {
   let warning = document.getElementById("warning");
   if (warning) {
@@ -11,42 +14,52 @@ function showWarning(text) {
 }
 
 window.addEventListener('load', async () => {
-  if (!('getScreens' in self)) {
-    showWarning("Please use Chrome 86+ to demo new multi-screen features");
-  } else if ('isMultiScreen' in self && !(await isMultiScreen())) {
-    // TODO: Update this warning with screenschange events.
-    showWarning("Please use multiple screens for full demo functionality");
+  if (!('getScreens' in self) || !('isExtended' in screen) || !('onchange' in screen)) {
+    showWarning("Please use Chrome 92+ to demo new multi-screen features");
   } else {
-    let permission = await navigator.permissions.query({name:'window-placement'});
-    permission.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
+    screen.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
+    permissionStatus = await navigator.permissions.query({name:'window-placement'});
+    permissionStatus.addEventListener('change', (p) => { permissionStatus = p; updateScreens(/*requestPermission=*/false); });
   }
-  if ('onscreenschange' in self)
-    addEventListener('screenschange', () => { updateScreens(/*requestPermission=*/false); });
   updateScreens(/*requestPermission=*/false);
 });
 
+function setScreenListeners() {
+  let screens = screensInterface ? screensInterface.screens : [ window.screen ];
+  for (const s of screens)
+    s.onchange = () => { updateScreens(/*requestPermission=*/false); };
+}
+
 async function getScreensWithWarningAndFallback(requestPermission) {
-  let screens = [ window.screen ];
   if ('getScreens' in self) {
-    let permission = await navigator.permissions.query({name:'window-placement'});
-    if (permission.state === 'granted' || (permission.state === 'prompt' && requestPermission))
-      screens = (await getScreens().catch(()=>{})) || [ window.screen ];
-    if (screens.length >= 1 && screens[0] !== window.screen)
+    if (!screensInterface && (permissionStatus.state === 'granted' ||
+                              (permissionStatus.state === 'prompt' && requestPermission))) {
+      screensInterface = await getScreens().catch(()=>{ return null; });
+      if (screensInterface) {
+        screensInterface.addEventListener('screenschange', () => { updateScreens(/*requestPermission=*/false); setScreenListeners(); });
+        setScreenListeners();
+      }
+    }
+    if (screensInterface && screensInterface.screens.length > 1)
       showWarning();  // Clear any warning.
-    else if (requestPermission || permission.state === 'denied')
+    else if (screensInterface && screensInterface.screens.length == 1)
+      showWarning("Please extend your desktop over multiple screens for full demo functionality");
+    else if (requestPermission || permissionStatus.state === 'denied')
       showWarning("Please allow the Window Placement permission for full demo functionality");
+
+    if (screensInterface) {
+      console.log("INFO: Detected " + screensInterface.screens.length + " screens:");
+      for (let i = 0; i < screensInterface.screens.length; ++i) {
+        const s = screensInterface.screens[i];
+        console.log(`[${i}] (${s.left},${s.top} ${s.width}x${s.height}) isExtended:${s.isExtended}` +
+                    `isPrimary:${s.isPrimary} isInternal:${s.isInternal}`);
+      }
+      return screensInterface.screens;
+    }
   }
 
-  console.log("INFO: Able to detect " + screens.length + " screen(s):");
-  for (const screen of screens) {
-    console.log(`[${screen.id ? screen.id : "window.screen"}] ` + 
-                `(${screen.left},${screen.top} ${screen.width}x${screen.height}) ` +
-                `scaleFactor:${screen.scaleFactor} colorDepth:${screen.colorDepth} ` +
-                `primary:${screen.primary} internal:${screen.internal} ` +
-                `touchSupport:${screen.touchSupport}`);
-  }
-
-  return screens;
+  console.log(`INFO: Detected window.screen: (${screen.left},${screen.top} ${screen.width}x${screen.height}) isExtended:${screen.isExtended}`);
+  return [ window.screen ];
 }
 
 async function showScreens(screens) {
@@ -81,9 +94,12 @@ async function showScreens(screens) {
     context.fillRect(rect.left, rect.top, rect.width, rect.height);
     context.fillStyle = "#000000";
     context.font = "15px Arial";
-    context.fillText(`[${screen.id ? screen.id : 'window.screen'}] ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.primary ? '(Primary)': ''}`, rect.left+10, rect.top+20);
+    context.fillText(`[${screen == window.screen ? 'window.screen' : i}] ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.isPrimary ? '(Primary)': ''}`, rect.left+10, rect.top+20);
     context.fillText(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth}`, rect.left+10, rect.top+40);
-    context.fillText(`primary:${screen.primary}, internal:${screen.internal}`, rect.left+10, rect.top+60);
+    if (screen == window.screen)
+      context.fillText(`isExtended:${screen.isExtended}`, rect.left+10, rect.top+60);
+    else
+      context.fillText(`isExtended:${screen.isExtended} isPrimary:${screen.isPrimary} isInternal:${screen.isInternal}`, rect.left+10, rect.top+60);
   }
 
   const rect = { left:(window.screenLeft-origin.left)*scale, top:(window.screenTop-origin.top)*scale, width:window.outerWidth*scale, height:window.outerHeight*scale };
@@ -95,11 +111,20 @@ async function updateScreens(requestPermission = true) {
   const screens = await getScreensWithWarningAndFallback(requestPermission);
   showScreens(screens);
 
+  if (document.getElementById("toggle-fullscreen-dropdown")) {
+    let buttons = `<button onclick="toggleFullscreen()">Current Screen</button>` +
+                  `<button onclick="updateScreens()">Get Screens</button>`;
+    // TODO(msw): Use screen.id and not indices.
+    for (let i = 0; i < screens.length; ++i)
+      buttons += screens[i] == window.screen ? `` : `<button onclick="toggleFullscreen(${i})"> Screen ${i}</button>`;
+    document.getElementById("toggle-fullscreen-dropdown").innerHTML = buttons;
+  }
   if (document.getElementById("fullscreen-slide-dropdown")) {
     let buttons = `<button onclick="fullscreenSlide()">Current Screen</button>` +
                   `<button onclick="updateScreens()">Get Screens</button>`;
-    for (let s of screens)
-      buttons += s == window.screen ? `` : `<button onclick="fullscreenSlide(${s.id})"> Screen ${s.id}</button>`;
+    // TODO(msw): Use screen.id and not indices.
+    for (let i = 0; i < screens.length; ++i)
+      buttons += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlide(${i})"> Screen ${i}</button>`;
     document.getElementById("fullscreen-slide-dropdown").innerHTML = buttons;
   }
 
@@ -159,11 +184,27 @@ function openWindow() {
 //   });
 // }
 
-async function toggleFullscreen() {
-  if (document.fullscreenElement)
-    document.exitFullscreen();
-  else
-    document.getElementById('application').requestFullscreen();
+async function toggleElementFullscreen(element, screenId) {
+  if (typeof(screenId) != "number") {  // Ignore EventListener's event args.
+    if (document.fullscreenElement == element)
+      document.exitFullscreen();
+    else
+      element.requestFullscreen();
+    return;
+  }
+
+  let fullscreenOptions = { navigationUI: "auto" };
+  const screens = await updateScreens(/*requestPermission=*/false);
+  if (screens.length > 1 && screenId < screens.length) {
+    console.log('Info: Requesting fullscreen on another screen.');
+    // TODO(msw): Use screen.id and not an index.
+    fullscreenOptions.screen = screens[screenId];
+  }
+  element.requestFullscreen(fullscreenOptions);
+}
+
+async function toggleFullscreen(screenId) {
+  toggleElementFullscreen(document.getElementById('application'), screenId);
 }
 
 async function openSlideWindow() {
@@ -208,25 +249,5 @@ async function openSlideAndNotesWindows() {
 }
 
 async function fullscreenSlide(screenId) {
-  if (screenId == undefined) {
-    // TODO: Choose another screen?
-    // (s.left != window.screen.left || s.top != window.screen.top)
-    document.getElementById('slide').requestFullscreen(); 
-    return;
-  }
-
-  let fullscreenOptions = { navigationUI: "auto" };
-  const screens = await updateScreens(/*requestPermission=*/false);
-  if (screens && screens.length > 1) {
-    console.log('Info: Requesting fullscreen on another screen.');
-    for (const s of screens) {
-      if (screenId == s.id) {
-        fullscreenOptions.screen = s;
-        break;
-      }
-    }
-    if (!fullscreenOptions.screen)
-      fullscreenOptions.screen = screens[0];
-  }
-  document.getElementById('slide').requestFullscreen(fullscreenOptions);
+  toggleElementFullscreen(document.getElementById('slide'), screenId);
 }

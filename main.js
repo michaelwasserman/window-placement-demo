@@ -48,17 +48,17 @@ async function getScreensWithWarningAndFallback(requestPermission) {
       showWarning("Please allow the Window Placement permission for full demo functionality");
 
     if (screensInterface) {
-      console.log("INFO: Detected " + screensInterface.screens.length + " screens:");
-      for (let i = 0; i < screensInterface.screens.length; ++i) {
-        const s = screensInterface.screens[i];
-        console.log(`[${i}] (${s.left},${s.top} ${s.width}x${s.height}) isExtended:${s.isExtended}` +
-                    `isPrimary:${s.isPrimary} isInternal:${s.isInternal}`);
-      }
+      // console.log("INFO: Detected " + screensInterface.screens.length + " screens:");
+      // for (let i = 0; i < screensInterface.screens.length; ++i) {
+      //   const s = screensInterface.screens[i];
+      //   console.log(`[${i}] (${s.left},${s.top} ${s.width}x${s.height}) isExtended:${s.isExtended}` +
+      //               `isPrimary:${s.isPrimary} isInternal:${s.isInternal}`);
+      // }
       return screensInterface.screens;
     }
   }
 
-  console.log(`INFO: Detected window.screen: (${screen.left},${screen.top} ${screen.width}x${screen.height}) isExtended:${screen.isExtended}`);
+  // console.log(`INFO: Detected window.screen: (${screen.left},${screen.top} ${screen.width}x${screen.height}) isExtended:${screen.isExtended}`);
   return [ window.screen ];
 }
 
@@ -127,7 +127,14 @@ async function updateScreens(requestPermission = true) {
       buttons += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlide(${i})"> Screen ${i}</button>`;
     document.getElementById("fullscreen-slide-dropdown").innerHTML = buttons;
   }
-
+  if (document.getElementById("fullscreen-slide-and-open-notes-window-dropdown")) {
+    let buttons = `<button onclick="fullscreenSlideAndOpenNotesWindow()">Current Screen</button>` +
+                  `<button onclick="updateScreens()">Get Screens</button>`;
+    // TODO(msw): Use screen.id and not indices.
+    for (let i = 0; i < screens.length; ++i)
+      buttons += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlideAndOpenNotesWindow(${i})"> Screen ${i}</button>`;
+    document.getElementById("fullscreen-slide-and-open-notes-window-dropdown").innerHTML = buttons;
+  }
   return screens;
 }
 
@@ -207,13 +214,16 @@ async function toggleFullscreen(screenId) {
   toggleElementFullscreen(document.getElementById('application'), screenId);
 }
 
-async function openSlideWindow() {
+async function openSlideWindow(screenId) {
   const screens = await updateScreens(/*requestPermission=*/false);
   let options = { x:screen.availLeft, y:screen.availTop,
                   width:screen.availWidth, height:screen.availHeight/2 };
   if (screens && screens.length > 1) {
-    options = { x:screens[1].availLeft, y:screens[1].availTop,
-                width:screens[1].availWidth, height:screens[1].availHeight };
+    let screen = screens[1];
+    if (typeof(screenId) == "number" && screenId >= 0 && screenId < screens.length)
+      screen = screens[screenId];
+    options = { x:screen.availLeft, y:screen.availTop,
+                width:screen.availWidth, height:screen.availHeight };
   }
   const features = getFeaturesFromOptions(options);
   // TODO: Re-enable and use the fullscreen feature string option?
@@ -223,15 +233,19 @@ async function openSlideWindow() {
   // slide_window.document.body.requestFullscreen();
   // TODO: Open another window or reposition the current window.
   // window.open('./notes.html', '_blank', getFeaturesFromOptions(options));
+  return slide_window;
 }
 
-async function openNotesWindow() {
+async function openNotesWindow(screenId) {
   const screens = await updateScreens(/*requestPermission=*/false);
   let options = { x:screen.availLeft, y:screen.availTop+screen.availHeight/2,
                   width:screen.availWidth, height:screen.availHeight/2 };
   if (screens && screens.length > 1) {
-    options = { x:screens[0].availLeft, y:screens[0].availTop,
-                width:screens[0].availWidth, height:screens[0].availHeight };
+    let screen = screens[0];
+    if (typeof(screenId) == "number" && screenId >= 0 && screenId < screens.length)
+      screen = screens[screenId];
+    options = { x:screen.availLeft, y:screen.availTop,
+                width:screen.availWidth, height:screen.availHeight };
   }
   const features = getFeaturesFromOptions(options);
   // TODO: Re-enable and use the fullscreen feature string option?
@@ -241,6 +255,7 @@ async function openNotesWindow() {
   // notes_window.document.body.requestFullscreen();
   // TODO: Open another window or reposition the current window.
   // window.open('./slide.html', '_blank', getFeaturesFromOptions(options));
+  return notes_window;
 }
 
 async function openSlideAndNotesWindows() {
@@ -250,4 +265,166 @@ async function openSlideAndNotesWindows() {
 
 async function fullscreenSlide(screenId) {
   toggleElementFullscreen(document.getElementById('slide'), screenId);
+}
+
+async function fullscreenSlideAndOpenNotesWindow(screenId) {
+  // MSW: Mostly tested on Linux and Chrome OS, Windows and Mac may differ.
+  if (!screensInterface)
+    screensInterface = await window.getScreens();
+
+  let s0 = screensInterface.screens[0];
+  let s1 = screensInterface.screens[1];
+  let popunderBounds = 'left='+(screenX+10)+',top='+(screenY+10)+',width='+outerWidth/2+',height='+outerHeight/2;
+  let availBounds = s => 'left='+s.availLeft+',top='+s.availTop+',width='+s.availWidth+',height='+s.availHeight;
+
+  // 1: With proposed TransientAllowPopup Window Placement affordances (2C), sites can:
+  //   a: request fullscreen on the opener (consuming user activation [and activating transient affordance]), and
+  //   b: open a popup (without a user activation requirement, via Popups & Redirects or transient affordance)
+  // document.body.requestFullscreen({screen:s1});
+  // const popup = window.open('.', '', availBounds(s0));
+
+  // Abuse 1A: [Esc] does not exit fullscreen until that window is activated.
+  // Effective? YES. The popup is activated and receives input by default.
+  // document.body.requestFullscreen({screen:s1});
+  // const popup = window.open('.', '', availBounds(s1));
+
+  // Abuse 1B: Fullscreen popunder - Place fullscreen over popup with [delayed] swap.
+  // Effective? YES. Fullscreen is activated and brought front on swap, after crrev.com/c/3108413
+  // NOTE: crbug.com/1241233 mitigated obscuring the fullscreen window or the inactive active popup.
+  // document.body.requestFullscreen({screen:s1});
+  // const popup = window.open('.', '', availBounds(s0));
+  // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 3000);
+
+  // Abuse 1C: Popunder - Exit fullscreen after opening the popup (also possible with two popups).
+  // Effective? YES. Site must swap displays before exit to activate the opener (see crbug.com/1218483 and crbug.com/1241233).
+  // document.body.requestFullscreen({screen:s1});
+  // const popup = window.open('.', '', popunderBounds);
+  // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 1000);
+  // setTimeout(() => { document.exitFullscreen(); }, 2000);
+
+  // Abuse 1D: Unexpected fullscreen + popup "swap". (also possible with two popups).
+  // Effective? YES. Site can swap fullscreen and popup without any interaction.
+  // document.body.requestFullscreen({screen:s1});
+  // const popup = window.open('.', '', availBounds(s0));
+  // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 2000);
+  // setTimeout(() => { popup.moveTo(s1.availLeft, s1.availTop); }, 2500);
+
+  // Abuse 1E: Open popup over fullscreen.
+  // Effective? NO. Fullscreen exits per ForSecurityDropFullscreen on open.
+  // document.body.requestFullscreen({screen:s1});
+  // const popup = window.open('.', '', availBounds(s1));
+
+  // Abuse 1F: Move popup over fullscreen.
+  // Effective? NO. Fullscreen exits per ForSecurityDropFullscreen on move.
+  // document.body.requestFullscreen({screen:s1});
+  // const popup = window.open('.', '', availBounds(s0));
+  // setTimeout(() => { popup.moveTo(s1.availLeft, s1.availTop); }, 2000);
+
+
+  // 2: With proposed TransientAllowFullscreen Window Placement affordances (2A), sites can:
+  //   a: open a popup (consuming user activation and activating TransientAllowFullscreen)
+  //   b: request fullscreen on the opener (using its TransientAllowFullscreen affordance)
+  // const popup = window.open('.', '', availBounds(s0));
+  // document.body.requestFullscreen({screen:s0});
+
+  // Abuse 2A: Fullscreen pop-under: Open a popup under the fullscreen window
+  // Effective? YES. On linux, popup is active under fullscreen window; Esc doesn't exit until the user changes active window (alt+tab, click, etc.)... 
+  // const popup = window.open('.', '', availBounds(s0));
+  // document.body.requestFullscreen({screen:s0});
+
+  // Abuse 2B: Post-fullscreen pop-under: Open a window under the pre-fullscreen window bounds and exit fullscreen quickly.
+  // - Open a same-screen popup
+  // - Request fullscreen on the opener to bring it to the front of the z-order
+  // - Exit opener fullscreen to restore pre-fullscreen position with higher z-order
+  // Effective? YES. On linux, popup is active under fullscreen window; Esc doesn't exit until the user changes active window (alt+tab, click, etc.)... 
+  // const popup = window.open('.', '', availBounds(s0));
+  // document.body.requestFullscreen({screen:s0}); // Opening on display 1 works too...
+  // setTimeout(() => { document.exitFullscreen(); }, 700);
+
+
+  // 3: Popups can move without activation, unrelated to new affordances around fullscreen.
+  // const popup = window.open("notes.html", "", "width=300,height=300");
+  // setTimeout(() => { popup.moveBy(100, 200); }, 1000);
+
+  // Abuse 3A: Move popup under re-activated opener window (needs two clicks).
+  // Effective? YES. Active popups stack over other windows, but inactive popups stack under more recently active windows.
+  // const popup = window.open("notes.html", "", "width=300,height=300");
+  // document.body.onclick = () => { popup.moveTo(screenX, screenY); }
+
+  // Abuse 3B: Move popup over another popup (needs Popups & Redirects or two clicks).
+  // Effective? YES. The one with os activation is z-ordered higher; pop-under cannot receive input. Okay...
+  // const popup1 = window.open('.', '', availBounds(s0));
+  // const popup2 = window.open('.', '', availBounds(s1));
+  // setTimeout(() => { console.log("MSW move"); popup.moveTo(slide_window.screenLeft, slide_window.screenTop); }, 3000);
+
+
+  // 4: Testing POC Chrome changes to let the popup enter fullscreen.
+  // const popup = window.open('.', '', availBounds(s0));
+  // setTimeout(() => { console.log("MSW"); toggleElementFullscreen(popup.document.body, 0); }, 700);
+
+
+  // MSW Scratch notes:
+
+  // setTimeout(() => { document.exitFullscreen(); }, 3000);
+  // document.body.requestFullscreen({screen:s1});
+  // window.open("notes.html", "_blank", "");
+  // setTimeout(() => { window.open("notes.html", "_blank", ""); }, 3000);
+  // const popup = window.open('.', '', availBounds(s0));
+  // setTimeout(() => { document.exitFullscreen(); }, 3000);
+  // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 3000);
+  // document.body.requestFullscreen({screen:(await getScreens()).screens[1]});
+  // window.open('.', '_blank', '');
+
+  // MSW: Opening a non-popup window while fullscreen switches to tab and exits fullscreen... sgtm.
+  // MSW: Test open tab sync w/ fullscreen transition (crash stack below)... 
+  // document.body.requestFullscreen({screen:s1});
+  // setTimeout(() => { window.open("notes.html", "_blank", "width=300,height=100"); }, 100);
+  // [525494:525494:0811/104324.084632:FATAL:fullscreen_controller.cc(111)] Check failed: web_contents == exclusive_access_manager()->context()->GetActiveWebContents() || web_contents == deactivated_contents_. 
+// #0 0x7f5a86479809 base::debug::CollectStackTrace()
+// #1 0x7f5a86374503 base::debug::StackTrace::StackTrace()
+// #2 0x7f5a86395ed4 logging::LogMessage::~LogMessage()
+// #3 0x7f5a8639691e logging::LogMessage::~LogMessage()
+// #4 0x56274b9d4461 FullscreenController::IsFullscreenForTabOrPending()
+// #5 0x7f5a834231d8 content::RenderWidgetHostImpl::GetVisualProperties()
+// #6 0x7f5a834240f8 content::RenderWidgetHostImpl::SynchronizeVisualProperties()
+// #7 0x7f5a8343c108 content::RenderWidgetHostViewAura::SynchronizeVisualProperties()
+// #8 0x7f5a8343d29c content::RenderWidgetHostViewAura::RequestRepaintForTesting()
+// #9 0x7f5a834443f1 content::RenderWidgetHostViewBase::UpdateScreenInfo()
+// #10 0x7f5a8344021b content::RenderWidgetHostViewAura::OnHostMovedInPixels()
+// #11 0x7f5a7f5fc54b aura::WindowTreeHost::OnHostMovedInPixels()
+// #12 0x7f5a7f5fe267 aura::WindowTreeHostPlatform::OnBoundsChanged()
+// #13 0x56274bc37809 BrowserDesktopWindowTreeHostLinux::OnBoundsChanged()
+// #14 0x7f5a72bfb98d ui::X11Window::SetBounds()
+// #15 0x7f5a7e66285d views::DesktopWindowTreeHost::SetBoundsInDIP()
+// #16 0x56274bbc671d BrowserView::ProcessFullscreen()
+// #17 0x56274bbc6891 BrowserView::EnterFullscreen()
+// #18 0x56274b9d4ad2 FullscreenController::EnterFullscreenModeInternal()
+// #19 0x56274b9d476f FullscreenController::EnterFullscreenModeForTab()
+// #20 0x7f5a8358ac64 content::WebContentsImpl::EnterFullscreenMode()
+// #21 0x7f5a833bde0c content::RenderFrameHostImpl::EnterFullscreen()
+// #22 0x7f5a8002bfec blink::mojom::LocalFrameHostStubDispatch::AcceptWithResponder()
+// #23 0x7f5a85cc0729 mojo::InterfaceEndpointClient::HandleValidatedMessage()
+// #24 0x7f5a85cc6b43 mojo::MessageDispatcher::Accept()
+// #25 0x7f5a85cc234d mojo::InterfaceEndpointClient::HandleIncomingMessage()
+// #26 0x7f5a848f9340 IPC::(anonymous namespace)::ChannelAssociatedGroupController::AcceptOnEndpointThread()
+// #27 0x7f5a848f5edc base::internal::Invoker<>::RunOnce()
+// #28 0x7f5a8640bdfd base::TaskAnnotator::RunTask()
+// #29 0x7f5a8642dfce base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::DoWorkImpl()
+// #30 0x7f5a8642d72b base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::DoWork()
+// #31 0x7f5a8642e612 base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::DoWork()
+// #32 0x7f5a863a4faf base::MessagePumpGlib::Run()
+// #33 0x7f5a8642eb7b base::sequence_manager::internal::ThreadControllerWithMessagePumpImpl::Run()
+// #34 0x7f5a863dfcd0 base::RunLoop::Run()
+// #35 0x7f5a82f34f06 content::BrowserMainLoop::RunMainMessageLoop()
+// #36 0x7f5a82f36c02 content::BrowserMainRunnerImpl::Run()
+// #37 0x7f5a82f322e7 content::BrowserMain()
+// #38 0x7f5a83a0c0a1 content::ContentMainRunnerImpl::RunBrowser()
+// #39 0x7f5a83a0ba2f content::ContentMainRunnerImpl::Run()
+// #40 0x7f5a83a0906a content::RunContentProcess()
+// #41 0x7f5a83a09ade content::ContentMain()
+// #42 0x5627499289de ChromeMain
+// #43 0x7f5a74c04d0a __libc_start_main
+// #44 0x5627499287fa _start
+
+
 }

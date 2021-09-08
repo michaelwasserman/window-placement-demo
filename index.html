@@ -51,13 +51,6 @@
       <button id="fullscreen-slide-get-screens">Get screens</button>
     </div>
   </div>
-  <div class="dropdown">
-    <button id="fullscreen-slide-and-open-notes-window">Fullscreen slide and open notes</button>
-    <div class="dropdown-content" hidden=true id="fullscreen-slide-and-open-notes-window-dropdown">
-      <button id="fullscreen-slide-and-open-notes-window-on-current-screen">Current screen</button>
-      <button id="fullscreen-slide-and-open-notes-window-get-screens">Get screens</button>
-    </div>
-  </div>
 </div>
 <p></p>
 <canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
@@ -90,9 +83,6 @@ window.addEventListener('load', () => {
   document.getElementById("fullscreen-slide").addEventListener('click', fullscreenSlide);
   document.getElementById("fullscreen-slide-on-current-screen").addEventListener('click', fullscreenSlide);
   document.getElementById("fullscreen-slide-get-screens").addEventListener('click', updateScreens);
-  document.getElementById("fullscreen-slide-and-open-notes-window").addEventListener('click', fullscreenSlideAndOpenNotesWindow);
-  document.getElementById("fullscreen-slide-and-open-notes-window-on-current-screen").addEventListener('click', fullscreenSlideAndOpenNotesWindow);
-  document.getElementById("fullscreen-slide-and-open-notes-window-get-screens").addEventListener('click', updateScreens);
 });
 </script>
 

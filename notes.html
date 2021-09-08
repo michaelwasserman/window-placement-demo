@@ -33,8 +33,6 @@ window.onload = () => {
     let pad = (i) => { return (i < 10 ? "0" : "") + i; }
     document.getElementById('timer').innerHTML = pad(Math.floor(timer/60)) + ":" + pad(++timer % 60)
   }, 1000);
-  // console.log("MSW notes onload, requesting fullscreen"); 
-  // document.body.requestFullscreen(); 
 }
 </script>
 

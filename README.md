@@ -5,8 +5,9 @@
 This is a basic demo of the proposed
 [Multi-Screen Window Placement](https://github.com/webscreens/window-placement) APIs.
 * Visualize the set of connected displays
-* Open windows on any connected display
+* Open or move a popup window onto any connected display
 * Request fullscreen on any connected display
+* Swap fullscreen from one display to another
 
 ## Instructions
 

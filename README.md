@@ -12,7 +12,8 @@ This is a basic demo of the proposed
 ## Instructions
 
 Run the demo at https://michaelwasserman.github.io/window-placement-demo
-* Enable chrome://flags#enable-experimental-web-platform-features
+* Use Chrome 93+ (which supports the Multi-Screen Window Placement origin trial)
+* Or enable chrome://flags#enable-experimental-web-platform-features
 * Or run chrome --enable-blink-features=WindowPlacement
 
 **[Optional]** Host this demo locally and run it:

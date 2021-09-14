@@ -277,88 +277,88 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
   let popunderBounds = 'left='+(screenX+10)+',top='+(screenY+10)+',width='+outerWidth/2+',height='+outerHeight/2;
   let availBounds = s => 'left='+s.availLeft+',top='+s.availTop+',width='+s.availWidth+',height='+s.availHeight;
 
-  // 1: With proposed TransientAllowPopup Window Placement affordances (2C), sites can:
-  //   a: request fullscreen on the opener (consuming user activation [and activating transient affordance]), and
-  //   b: open a popup (without a user activation requirement, via Popups & Redirects or transient affordance)
+  // // 1: With proposed TransientAllowPopup Window Placement affordances (2C), sites can:
+  // //   a: request fullscreen on the opener (consuming user activation [and activating transient affordance]), and
+  // //   b: open a popup (without a user activation requirement, via Popups & Redirects or transient affordance)
   // document.body.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s0));
 
-  // Abuse 1A: [Esc] does not exit fullscreen until that window is activated.
-  // Effective? YES. The popup is activated and receives input by default.
+  // // Abuse 1A: [Esc] does not exit fullscreen until that window is activated.
+  // // Effective? YES. The popup is activated and receives input by default.
   // document.body.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s1));
 
-  // Abuse 1B: Fullscreen popunder - Place fullscreen over popup with [delayed] swap.
-  // Effective? YES. Fullscreen is activated and brought front on swap, after crrev.com/c/3108413
-  // NOTE: crbug.com/1241233 mitigated obscuring the fullscreen window or the inactive active popup.
+  // // Abuse 1B: Fullscreen popunder - Place fullscreen over popup with [delayed] swap.
+  // // Effective? YES. Fullscreen is activated and brought front on swap, after crrev.com/c/3108413
+  // // NOTE: crbug.com/1241233 mitigated obscuring the fullscreen window or the inactive active popup.
   // document.body.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s0));
   // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 3000);
 
-  // Abuse 1C: Popunder - Exit fullscreen after opening the popup (also possible with two popups).
-  // Effective? YES. Site must swap displays before exit to activate the opener (see crbug.com/1218483 and crbug.com/1241233).
+  // // Abuse 1C: Popunder - Exit fullscreen after opening the popup (also possible with two popups).
+  // // Effective? YES. Site must swap displays before exit to activate the opener (see crbug.com/1218483 and crbug.com/1241233).
   // document.body.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', popunderBounds);
   // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 1000);
   // setTimeout(() => { document.exitFullscreen(); }, 2000);
 
-  // Abuse 1D: Unexpected fullscreen + popup "swap". (also possible with two popups).
-  // Effective? YES. Site can swap fullscreen and popup without any interaction.
+  // // Abuse 1D: Unexpected fullscreen + popup "swap". (also possible with two popups).
+  // // Effective? YES. Site can swap fullscreen and popup without any interaction.
   // document.body.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s0));
   // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 2000);
   // setTimeout(() => { popup.moveTo(s1.availLeft, s1.availTop); }, 2500);
 
-  // Abuse 1E: Open popup over fullscreen.
-  // Effective? NO. Fullscreen exits per ForSecurityDropFullscreen on open.
+  // // Abuse 1E: Open popup over fullscreen.
+  // // Effective? NO. Fullscreen exits per ForSecurityDropFullscreen on open.
   // document.body.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s1));
 
-  // Abuse 1F: Move popup over fullscreen.
-  // Effective? NO. Fullscreen exits per ForSecurityDropFullscreen on move.
+  // // Abuse 1F: Move popup over fullscreen.
+  // // Effective? NO. Fullscreen exits per ForSecurityDropFullscreen on move.
   // document.body.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s0));
   // setTimeout(() => { popup.moveTo(s1.availLeft, s1.availTop); }, 2000);
 
 
-  // 2: With proposed TransientAllowFullscreen Window Placement affordances (2A), sites can:
-  //   a: open a popup (consuming user activation and activating TransientAllowFullscreen)
-  //   b: request fullscreen on the opener (using its TransientAllowFullscreen affordance)
+  // // 2: With proposed TransientAllowFullscreen Window Placement affordances (2A), sites can:
+  // //   a: open a popup (consuming user activation and activating TransientAllowFullscreen)
+  // //   b: request fullscreen on the opener (using its TransientAllowFullscreen affordance)
   // const popup = window.open('.', '', availBounds(s0));
   // document.body.requestFullscreen({screen:s0});
 
-  // Abuse 2A: Fullscreen pop-under: Open a popup under the fullscreen window
-  // Effective? YES. On linux, popup is active under fullscreen window; Esc doesn't exit until the user changes active window (alt+tab, click, etc.)... 
+  // // Abuse 2A: Fullscreen pop-under: Open a popup under the fullscreen window
+  // // Effective? YES. On linux, popup is active under fullscreen window; Esc doesn't exit until the user changes active window (alt+tab, click, etc.)... 
   // const popup = window.open('.', '', availBounds(s0));
   // document.body.requestFullscreen({screen:s0});
 
-  // Abuse 2B: Post-fullscreen pop-under: Open a window under the pre-fullscreen window bounds and exit fullscreen quickly.
-  // - Open a same-screen popup
-  // - Request fullscreen on the opener to bring it to the front of the z-order
-  // - Exit opener fullscreen to restore pre-fullscreen position with higher z-order
-  // Effective? YES. On linux, popup is active under fullscreen window; Esc doesn't exit until the user changes active window (alt+tab, click, etc.)... 
+  // // Abuse 2B: Post-fullscreen pop-under: Open a window under the pre-fullscreen window bounds and exit fullscreen quickly.
+  // // - Open a same-screen popup
+  // // - Request fullscreen on the opener to bring it to the front of the z-order
+  // // - Exit opener fullscreen to restore pre-fullscreen position with higher z-order
+  // // Effective? YES. On linux, popup is active under fullscreen window; Esc doesn't exit until the user changes active window (alt+tab, click, etc.)... 
   // const popup = window.open('.', '', availBounds(s0));
   // document.body.requestFullscreen({screen:s0}); // Opening on display 1 works too...
   // setTimeout(() => { document.exitFullscreen(); }, 700);
 
 
-  // 3: Popups can move without activation, unrelated to new affordances around fullscreen.
+  // // 3: Popups can move without activation, unrelated to new affordances around fullscreen.
   // const popup = window.open("notes.html", "", "width=300,height=300");
   // setTimeout(() => { popup.moveBy(100, 200); }, 1000);
 
-  // Abuse 3A: Move popup under re-activated opener window (needs two clicks).
-  // Effective? YES. Active popups stack over other windows, but inactive popups stack under more recently active windows.
+  // // Abuse 3A: Move popup under re-activated opener window (needs two clicks).
+  // // Effective? YES. Active popups stack over other windows, but inactive popups stack under more recently active windows.
   // const popup = window.open("notes.html", "", "width=300,height=300");
   // document.body.onclick = () => { popup.moveTo(screenX, screenY); }
 
-  // Abuse 3B: Move popup over another popup (needs Popups & Redirects or two clicks).
-  // Effective? YES. The one with os activation is z-ordered higher; pop-under cannot receive input. Okay...
+  // // Abuse 3B: Move popup over another popup (needs Popups & Redirects or two clicks).
+  // // Effective? YES. The one with os activation is z-ordered higher; pop-under cannot receive input. Okay...
   // const popup1 = window.open('.', '', availBounds(s0));
   // const popup2 = window.open('.', '', availBounds(s1));
   // setTimeout(() => { console.log("MSW move"); popup.moveTo(slide_window.screenLeft, slide_window.screenTop); }, 3000);
 
 
-  // 4: Testing POC Chrome changes to let the popup enter fullscreen.
+  // // 4: Testing POC Chrome changes to let the popup enter fullscreen.
   // const popup = window.open('.', '', availBounds(s0));
   // setTimeout(() => { console.log("MSW"); toggleElementFullscreen(popup.document.body, 0); }, 700);
 

@@ -45,13 +45,13 @@ self.addEventListener('fetch', function(event) {
 //   let url = './slide.html'
 
 //   // TODO: Expose screen information for service workers?
-//   // const screens = await self.getScreens();
+//   // const screensInterface = await self.getScreens();
 
-//   // TODO: Support Service Worker's clients.openWindow options onces that lands.
-//   // let options = { x:      screens[0].left,
-//   //                 y:      screens[0].top,
-//   //                 width:  screens[0].width,
-//   //                 height: screens[0].height,
+//   // TODO: Support options in Service Worker's clients.openWindow()?
+//   // let options = { x:      screensInterface.screens[0].left,
+//   //                 y:      screensInterface.screens[0].top,
+//   //                 width:  screensInterface.screens[0].width,
+//   //                 height: screensInterface.screens[0].height,
 //   //                 type:  "window" }
 //   // clients.openWindow('./slide.html', options);
 

@@ -15,7 +15,7 @@ function showWarning(text) {
 
 window.addEventListener('load', async () => {
   if (!('getScreens' in self) || !('isExtended' in screen) || !('onchange' in screen)) {
-    showWarning("Please use Chrome 92+ to demo new multi-screen features");
+    showWarning("Please use Chrome 93+ to demo new multi-screen features");
   } else {
     screen.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
     permissionStatus = await navigator.permissions.query({name:'window-placement'});
@@ -268,6 +268,11 @@ async function fullscreenSlide(screenId) {
 }
 
 async function fullscreenSlideAndOpenNotesWindow(screenId) {
+  // if (typeof(screenId) != "number")
+  //   screenId = 0;
+  // fullscreenSlide(screenId);
+  // openNotesWindow(screenId == 0 ? 1 : 0);
+
   // MSW: Mostly tested on Linux and Chrome OS, Windows and Mac may differ.
   if (!screensInterface)
     screensInterface = await window.getScreens();

@@ -15,7 +15,7 @@ function showWarning(text) {
 
 window.addEventListener('load', async () => {
   if (!('getScreens' in self) || !('isExtended' in screen) || !('onchange' in screen)) {
-    showWarning("Please use Chrome 92+ to demo new multi-screen features");
+    showWarning("Please use Chrome 93+ to demo new multi-screen features");
   } else {
     screen.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
     permissionStatus = await navigator.permissions.query({name:'window-placement'});
@@ -48,17 +48,17 @@ async function getScreensWithWarningAndFallback(requestPermission) {
       showWarning("Please allow the Window Placement permission for full demo functionality");
 
     if (screensInterface) {
-      console.log("INFO: Detected " + screensInterface.screens.length + " screens:");
-      for (let i = 0; i < screensInterface.screens.length; ++i) {
-        const s = screensInterface.screens[i];
-        console.log(`[${i}] (${s.left},${s.top} ${s.width}x${s.height}) isExtended:${s.isExtended}` +
-                    `isPrimary:${s.isPrimary} isInternal:${s.isInternal}`);
-      }
+      // console.log("INFO: Detected " + screensInterface.screens.length + " screens:");
+      // for (let i = 0; i < screensInterface.screens.length; ++i) {
+      //   const s = screensInterface.screens[i];
+      //   console.log(`[${i}] (${s.left},${s.top} ${s.width}x${s.height}) isExtended:${s.isExtended}` +
+      //               `isPrimary:${s.isPrimary} isInternal:${s.isInternal}`);
+      // }
       return screensInterface.screens;
     }
   }
 
-  console.log(`INFO: Detected window.screen: (${screen.left},${screen.top} ${screen.width}x${screen.height}) isExtended:${screen.isExtended}`);
+  // console.log(`INFO: Detected window.screen: (${screen.left},${screen.top} ${screen.width}x${screen.height}) isExtended:${screen.isExtended}`);
   return [ window.screen ];
 }
 
@@ -127,7 +127,14 @@ async function updateScreens(requestPermission = true) {
       buttons += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlide(${i})"> Screen ${i}</button>`;
     document.getElementById("fullscreen-slide-dropdown").innerHTML = buttons;
   }
-
+  if (document.getElementById("fullscreen-slide-and-open-notes-window-dropdown")) {
+    let buttons = `<button onclick="fullscreenSlideAndOpenNotesWindow()">Current Screen</button>` +
+                  `<button onclick="updateScreens()">Get Screens</button>`;
+    // TODO(msw): Use screen.id and not indices.
+    for (let i = 0; i < screens.length; ++i)
+      buttons += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlideAndOpenNotesWindow(${i})"> Screen ${i}</button>`;
+    document.getElementById("fullscreen-slide-and-open-notes-window-dropdown").innerHTML = buttons;
+  }
   return screens;
 }
 
@@ -207,13 +214,16 @@ async function toggleFullscreen(screenId) {
   toggleElementFullscreen(document.getElementById('application'), screenId);
 }
 
-async function openSlideWindow() {
+async function openSlideWindow(screenId) {
   const screens = await updateScreens(/*requestPermission=*/false);
   let options = { x:screen.availLeft, y:screen.availTop,
                   width:screen.availWidth, height:screen.availHeight/2 };
   if (screens && screens.length > 1) {
-    options = { x:screens[1].availLeft, y:screens[1].availTop,
-                width:screens[1].availWidth, height:screens[1].availHeight };
+    let screen = screens[1];
+    if (typeof(screenId) == "number" && screenId >= 0 && screenId < screens.length)
+      screen = screens[screenId];
+    options = { x:screen.availLeft, y:screen.availTop,
+                width:screen.availWidth, height:screen.availHeight };
   }
   const features = getFeaturesFromOptions(options);
   // TODO: Re-enable and use the fullscreen feature string option?
@@ -223,15 +233,19 @@ async function openSlideWindow() {
   // slide_window.document.body.requestFullscreen();
   // TODO: Open another window or reposition the current window.
   // window.open('./notes.html', '_blank', getFeaturesFromOptions(options));
+  return slide_window;
 }
 
-async function openNotesWindow() {
+async function openNotesWindow(screenId) {
   const screens = await updateScreens(/*requestPermission=*/false);
   let options = { x:screen.availLeft, y:screen.availTop+screen.availHeight/2,
                   width:screen.availWidth, height:screen.availHeight/2 };
   if (screens && screens.length > 1) {
-    options = { x:screens[0].availLeft, y:screens[0].availTop,
-                width:screens[0].availWidth, height:screens[0].availHeight };
+    let screen = screens[0];
+    if (typeof(screenId) == "number" && screenId >= 0 && screenId < screens.length)
+      screen = screens[screenId];
+    options = { x:screen.availLeft, y:screen.availTop,
+                width:screen.availWidth, height:screen.availHeight };
   }
   const features = getFeaturesFromOptions(options);
   // TODO: Re-enable and use the fullscreen feature string option?
@@ -241,6 +255,7 @@ async function openNotesWindow() {
   // notes_window.document.body.requestFullscreen();
   // TODO: Open another window or reposition the current window.
   // window.open('./slide.html', '_blank', getFeaturesFromOptions(options));
+  return notes_window;
 }
 
 async function openSlideAndNotesWindows() {
@@ -250,4 +265,11 @@ async function openSlideAndNotesWindows() {
 
 async function fullscreenSlide(screenId) {
   toggleElementFullscreen(document.getElementById('slide'), screenId);
+}
+
+async function fullscreenSlideAndOpenNotesWindow(screenId) {
+  if (typeof(screenId) != "number")
+    screenId = 0;
+  fullscreenSlide(screenId);
+  openNotesWindow(screenId == 0 ? 1 : 0);
 }

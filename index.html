@@ -13,7 +13,7 @@
 <body>
 
 <div class="application" id="application">
-<h3>Multi-Screen Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>)</h3>
+<h3>Multi-Screen Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>, <a href="https://www.chromestatus.com/feature/5252960583942144">ChromeStatus</a>)</h3>
 <h4 id="warning" hidden=true style="color: red;"></h4>
 <div class="controls">
   <div style="display:flex; align-items:center;">
@@ -51,6 +51,13 @@
       <button id="fullscreen-slide-get-screens">Get screens</button>
     </div>
   </div>
+  <div class="dropdown">
+    <button id="fullscreen-slide-and-open-notes-window">Fullscreen slide and open notes</button>
+    <div class="dropdown-content" hidden=true id="fullscreen-slide-and-open-notes-window-dropdown">
+      <button id="fullscreen-slide-and-open-notes-window-on-current-screen">Current screen</button>
+      <button id="fullscreen-slide-and-open-notes-window-get-screens">Get screens</button>
+    </div>
+  </div>
 </div>
 <p></p>
 <canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
@@ -83,6 +90,9 @@ window.addEventListener('load', () => {
   document.getElementById("fullscreen-slide").addEventListener('click', fullscreenSlide);
   document.getElementById("fullscreen-slide-on-current-screen").addEventListener('click', fullscreenSlide);
   document.getElementById("fullscreen-slide-get-screens").addEventListener('click', updateScreens);
+  document.getElementById("fullscreen-slide-and-open-notes-window").addEventListener('click', fullscreenSlideAndOpenNotesWindow);
+  document.getElementById("fullscreen-slide-and-open-notes-window-on-current-screen").addEventListener('click', fullscreenSlideAndOpenNotesWindow);
+  document.getElementById("fullscreen-slide-and-open-notes-window-get-screens").addEventListener('click', updateScreens);
 });
 </script>
 

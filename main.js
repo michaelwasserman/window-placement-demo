@@ -34,7 +34,7 @@ async function getScreensWithWarningAndFallback(requestPermission) {
   if ('getScreens' in self) {
     if (!screensInterface && (permissionStatus.state === 'granted' ||
                               (permissionStatus.state === 'prompt' && requestPermission))) {
-      screensInterface = await getScreens().catch(()=>{ return null; });
+      screensInterface = await getScreens().catch((e)=>{ console.error(e); return null; });
       if (screensInterface) {
         screensInterface.addEventListener('screenschange', () => { updateScreens(/*requestPermission=*/false); setScreenListeners(); });
         setScreenListeners();

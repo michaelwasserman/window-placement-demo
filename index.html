@@ -11,8 +11,6 @@
   <meta http-equiv="origin-trial" content="Al4uVCxJUCCs3MPUN8BvbllrZ61KNfScsRfjESXFg6i6Qex10/AZyOhS7XynN/SdcbkyjkVEt6zHrghpuqNWmw8AAABmeyJvcmlnaW4iOiJodHRwczovL21pY2hhZWx3YXNzZXJtYW4uZ2l0aHViLmlvOjQ0MyIsImZlYXR1cmUiOiJXaW5kb3dQbGFjZW1lbnRPVDIiLCJleHBpcnkiOjE2MzY1MDIzOTl9">
 </head>
 <body>
-
-<div class="application" id="application">
 <h3>Multi-Screen Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>, <a href="https://www.chromestatus.com/feature/5252960583942144">ChromeStatus</a>)</h3>
 <h4 id="warning" hidden=true style="color: red;"></h4>
 <div class="controls">
@@ -61,14 +59,12 @@
 </div>
 <p></p>
 <canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
-</div>
-
 <!-- Testing of iframe functionality and permissions:
   <iframe src="https://michaelwasserman.github.io/window-placement-demo/" style="width:800; height:600;" allow="fullscreen;window-placement"></iframe>
   <iframe src="https://permission.site" style="width:800; height:600;" allow="fullscreen;geolocation;window-placement"></iframe>
   <iframe src="about:blank" style="width:800; height:600;" allow="window-placement none"></iframe>
 -->
-
+</body>
 <script src="main.js"></script>
 <script>
 'use strict';
@@ -95,6 +91,4 @@ window.addEventListener('load', () => {
   document.getElementById("fullscreen-slide-and-open-notes-window-get-screens").addEventListener('click', updateScreens);
 });
 </script>
-
-</body>
 </html>

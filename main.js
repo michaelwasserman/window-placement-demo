@@ -211,7 +211,7 @@ async function toggleElementFullscreen(element, screenId) {
 }
 
 async function toggleFullscreen(screenId) {
-  toggleElementFullscreen(document.getElementById('application'), screenId);
+  toggleElementFullscreen(document.documentElement, screenId);
 }
 
 async function openSlideWindow(screenId) {

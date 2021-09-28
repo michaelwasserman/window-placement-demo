@@ -282,6 +282,16 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
   let popunderBounds = 'left='+(screenX+10)+',top='+(screenY+10)+',width='+outerWidth/2+',height='+outerHeight/2;
   let availBounds = s => 'left='+s.availLeft+',top='+s.availTop+',width='+s.availWidth+',height='+s.availHeight;
 
+  // MSW: Testing ground:
+  screensInterface.addEventListener('screenschange', async () => {
+    console.log("MSW Requesting fullscreen on screenschange"
+                + " document.visibilityState:" + document.visibilityState
+                );
+    document.body.requestFullscreen()
+      .then(() => { console.log(`MSW Success: ${document.fullscreenElement}`); })
+      .catch(e => { console.log(`MSW Error: ${e.message} (${e.name})`); });
+  });
+
   // // 1: With proposed TransientAllowPopup Window Placement affordances (2C), sites can:
   // //   a: request fullscreen on the opener (consuming user activation [and activating transient affordance]), and
   // //   b: open a popup (without a user activation requirement, via Popups & Redirects or transient affordance)
@@ -369,6 +379,14 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
 
 
   // MSW Scratch notes:
+
+  // Opening a new tab while fullscreen switches to that tab and exits fullscreen... sgtm.
+  // document.body.requestFullscreen({screen:s1});
+  // setTimeout(() => { window.open("notes.html", "", ""); }, 1000);
+
+  // Request cross-screen fullscreen + synchronously open a new tab (flaky graphical defects on linux => crbug.com/1250085).
+  // document.body.requestFullscreen({screen:s1});
+  // window.open("notes.html", "", "");
 
   // setTimeout(() => { document.exitFullscreen(); }, 3000);
   // document.body.requestFullscreen({screen:s1});

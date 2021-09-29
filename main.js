@@ -230,7 +230,7 @@ async function openSlideWindow(screenId) {
   console.log('INFO: Opening window with feature string: ' + features);
   const slide_window = window.open('./slide.html', '_blank', features);
   // TODO: Make the window fullscreen; this doesn't currently work:
-  // slide_window.document.body.requestFullscreen();
+  // slide_window.document.documentElement.requestFullscreen();
   // TODO: Open another window or reposition the current window.
   // window.open('./notes.html', '_blank', getFeaturesFromOptions(options));
   return slide_window;
@@ -252,7 +252,7 @@ async function openNotesWindow(screenId) {
   console.log('INFO: Opening window with feature string: ' + features);
   const notes_window = window.open('./notes.html', '_blank', features);
   // TODO: Make the window fullscreen; this doesn't currently work:
-  // notes_window.document.body.requestFullscreen();
+  // notes_window.document.documentElement.requestFullscreen();
   // TODO: Open another window or reposition the current window.
   // window.open('./slide.html', '_blank', getFeaturesFromOptions(options));
   return notes_window;
@@ -267,6 +267,8 @@ async function fullscreenSlide(screenId) {
   toggleElementFullscreen(document.getElementById('slide'), screenId);
 }
 
+let popups = [];
+
 async function fullscreenSlideAndOpenNotesWindow(screenId) {
   // if (typeof(screenId) != "number")
   //   screenId = 0;
@@ -279,59 +281,97 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
 
   let s0 = screensInterface.screens[0];
   let s1 = screensInterface.screens[1];
-  let popunderBounds = 'left='+(screenX+10)+',top='+(screenY+10)+',width='+outerWidth/2+',height='+outerHeight/2;
+  let popunderLeft = screenX+20;
+  let popunderTop = screenY+20;
+  let popunderWidth = innerWidth-40;
+  let popunderHeight = innerHeight-40;
+  let popunderBounds = 'left='+popunderLeft+',top='+popunderTop+',width='+popunderWidth+',height='+popunderHeight;
   let availBounds = s => 'left='+s.availLeft+',top='+s.availTop+',width='+s.availWidth+',height='+s.availHeight;
 
   // MSW: Testing ground:
-  screensInterface.addEventListener('screenschange', async () => {
-    console.log("MSW Requesting fullscreen on screenschange"
-                + " document.visibilityState:" + document.visibilityState
-                );
-    document.body.requestFullscreen()
-      .then(() => { console.log(`MSW Success: ${document.fullscreenElement}`); })
-      .catch(e => { console.log(`MSW Error: ${e.message} (${e.name})`); });
+
+  // Super malicious fullscreen display swap popunder creator: 
+  await document.documentElement.requestFullscreen({screen:s1});
+  document.addEventListener('click', () => {
+    if (!document.fullscreenElement)
+      return;
+    let current = screensInterface.currentScreen;
+    let other = screensInterface.screens.find(s => s!=current);
+    // Open a new popup on the other display.
+    console.log("MSW popup: " + availBounds(other));
+    popups.push(window.open('.', '', availBounds(other)));
+    setTimeout(() => {
+      // Move all popups to the other display.
+      popups.forEach(p => {
+        p.moveTo(other.availLeft, other.availTop);
+        p.resizeTo(other.availWidth, other.availHeight);  
+      });
+      // Move the fullscreen window over all the popups on the other display.
+      document.documentElement.requestFullscreen({screen:other});
+    }, 1000);
+    // setTimeout(() => { document.exitFullscreen(); }, 2000);
   });
+  document.addEventListener('fullscreenchange', () => {
+    console.log("MSW fullscreenchange");
+    if (!document.fullscreenElement) {
+      // Move all the popups under the window that exited fullscreen.
+      popups.forEach(p => {
+        p.moveTo(popunderLeft, popunderTop);
+        p.resizeTo(popunderWidth, popunderHeight);  
+      });
+    }
+  });
+
+  // MSW: Requesting fullscreen when the window isn't visible... 
+  // screensInterface.addEventListener('screenschange', async () => {
+  //   console.log("MSW Requesting fullscreen on screenschange"
+  //               + " document.visibilityState:" + document.visibilityState
+  //               );
+  //   document.documentElement.requestFullscreen()
+  //     .then(() => { console.log(`MSW Success: ${document.documentElement}`); })
+  //     .catch(e => { console.log(`MSW Error: ${e.message} (${e.name})`); });
+  // });
 
   // // 1: With proposed TransientAllowPopup Window Placement affordances (2C), sites can:
   // //   a: request fullscreen on the opener (consuming user activation [and activating transient affordance]), and
   // //   b: open a popup (without a user activation requirement, via Popups & Redirects or transient affordance)
-  // document.body.requestFullscreen({screen:s1});
+  // document.documentElement.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s0));
 
   // // Abuse 1A: [Esc] does not exit fullscreen until that window is activated.
   // // Effective? YES. The popup is activated and receives input by default.
-  // document.body.requestFullscreen({screen:s1});
+  // document.documentElement.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s1));
 
   // // Abuse 1B: Fullscreen popunder - Place fullscreen over popup with [delayed] swap.
   // // Effective? YES. Fullscreen is activated and brought front on swap, after crrev.com/c/3108413
   // // NOTE: crbug.com/1241233 mitigated obscuring the fullscreen window or the inactive active popup.
-  // document.body.requestFullscreen({screen:s1});
+  // document.documentElement.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s0));
-  // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 3000);
+  // setTimeout(() => { document.documentElement.requestFullscreen({screen:s0}); }, 3000);
 
   // // Abuse 1C: Popunder - Exit fullscreen after opening the popup (also possible with two popups).
   // // Effective? YES. Site must swap displays before exit to activate the opener (see crbug.com/1218483 and crbug.com/1241233).
-  // document.body.requestFullscreen({screen:s1});
+  // document.documentElement.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', popunderBounds);
-  // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 1000);
+  // setTimeout(() => { document.documentElement.requestFullscreen({screen:s0}); }, 1000);
   // setTimeout(() => { document.exitFullscreen(); }, 2000);
 
   // // Abuse 1D: Unexpected fullscreen + popup "swap". (also possible with two popups).
   // // Effective? YES. Site can swap fullscreen and popup without any interaction.
-  // document.body.requestFullscreen({screen:s1});
+  // document.documentElement.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s0));
-  // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 2000);
+  // setTimeout(() => { document.documentElement.requestFullscreen({screen:s0}); }, 2000);
   // setTimeout(() => { popup.moveTo(s1.availLeft, s1.availTop); }, 2500);
 
   // // Abuse 1E: Open popup over fullscreen.
   // // Effective? NO. Fullscreen exits per ForSecurityDropFullscreen on open.
-  // document.body.requestFullscreen({screen:s1});
+  // document.documentElement.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s1));
 
   // // Abuse 1F: Move popup over fullscreen.
   // // Effective? NO. Fullscreen exits per ForSecurityDropFullscreen on move.
-  // document.body.requestFullscreen({screen:s1});
+  // document.documentElement.requestFullscreen({screen:s1});
   // const popup = window.open('.', '', availBounds(s0));
   // setTimeout(() => { popup.moveTo(s1.availLeft, s1.availTop); }, 2000);
 
@@ -340,12 +380,12 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
   // //   a: open a popup (consuming user activation and activating TransientAllowFullscreen)
   // //   b: request fullscreen on the opener (using its TransientAllowFullscreen affordance)
   // const popup = window.open('.', '', availBounds(s0));
-  // document.body.requestFullscreen({screen:s0});
+  // document.documentElement.requestFullscreen({screen:s0});
 
   // // Abuse 2A: Fullscreen pop-under: Open a popup under the fullscreen window
   // // Effective? YES. On linux, popup is active under fullscreen window; Esc doesn't exit until the user changes active window (alt+tab, click, etc.)... 
   // const popup = window.open('.', '', availBounds(s0));
-  // document.body.requestFullscreen({screen:s0});
+  // document.documentElement.requestFullscreen({screen:s0});
 
   // // Abuse 2B: Post-fullscreen pop-under: Open a window under the pre-fullscreen window bounds and exit fullscreen quickly.
   // // - Open a same-screen popup
@@ -353,7 +393,7 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
   // // - Exit opener fullscreen to restore pre-fullscreen position with higher z-order
   // // Effective? YES. On linux, popup is active under fullscreen window; Esc doesn't exit until the user changes active window (alt+tab, click, etc.)... 
   // const popup = window.open('.', '', availBounds(s0));
-  // document.body.requestFullscreen({screen:s0}); // Opening on display 1 works too...
+  // document.documentElement.requestFullscreen({screen:s0}); // Opening on display 1 works too...
   // setTimeout(() => { document.exitFullscreen(); }, 700);
 
 
@@ -364,7 +404,7 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
   // // Abuse 3A: Move popup under re-activated opener window (needs two clicks).
   // // Effective? YES. Active popups stack over other windows, but inactive popups stack under more recently active windows.
   // const popup = window.open("notes.html", "", "width=300,height=300");
-  // document.body.onclick = () => { popup.moveTo(screenX, screenY); }
+  // document.documentElement.onclick = () => { popup.moveTo(screenX, screenY); }
 
   // // Abuse 3B: Move popup over another popup (needs Popups & Redirects or two clicks).
   // // Effective? YES. The one with os activation is z-ordered higher; pop-under cannot receive input. Okay...
@@ -375,26 +415,26 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
 
   // // 4: Testing POC Chrome changes to let the popup enter fullscreen.
   // const popup = window.open('.', '', availBounds(s0));
-  // setTimeout(() => { console.log("MSW"); toggleElementFullscreen(popup.document.body, 0); }, 700);
+  // setTimeout(() => { console.log("MSW"); toggleElementFullscreen(popup.document.documentElement, 0); }, 700);
 
 
   // MSW Scratch notes:
 
   // Opening a new tab while fullscreen switches to that tab and exits fullscreen... sgtm.
-  // document.body.requestFullscreen({screen:s1});
+  // document.documentElement.requestFullscreen({screen:s1});
   // setTimeout(() => { window.open("notes.html", "", ""); }, 1000);
 
   // Request cross-screen fullscreen + synchronously open a new tab (flaky graphical defects on linux => crbug.com/1250085).
-  // document.body.requestFullscreen({screen:s1});
+  // document.documentElement.requestFullscreen({screen:s1});
   // window.open("notes.html", "", "");
 
   // setTimeout(() => { document.exitFullscreen(); }, 3000);
-  // document.body.requestFullscreen({screen:s1});
+  // document.documentElement.requestFullscreen({screen:s1});
   // window.open("notes.html", "_blank", "");
   // setTimeout(() => { window.open("notes.html", "_blank", ""); }, 3000);
   // const popup = window.open('.', '', availBounds(s0));
   // setTimeout(() => { document.exitFullscreen(); }, 3000);
-  // setTimeout(() => { document.body.requestFullscreen({screen:s0}); }, 3000);
-  // document.body.requestFullscreen({screen:(await getScreens()).screens[1]});
+  // setTimeout(() => { document.documentElement.requestFullscreen({screen:s0}); }, 3000);
+  // document.documentElement.requestFullscreen({screen:(await getScreens()).screens[1]});
   // window.open('.', '_blank', '');
 }

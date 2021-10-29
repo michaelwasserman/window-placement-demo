@@ -1,7 +1,7 @@
 'use strict';
 
 let permissionStatus = null;
-let screensInterface = null;
+let screenDetails = null;
 
 function showWarning(text) {
   let warning = document.getElementById("warning");
@@ -14,7 +14,7 @@ function showWarning(text) {
 }
 
 window.addEventListener('load', async () => {
-  if (!('getScreens' in self) || !('isExtended' in screen) || !('onchange' in screen)) {
+  if (!('getScreenDetails' in self || 'getScreens' in self) || !('isExtended' in screen) || !('onchange' in screen)) {
     showWarning("Please use Chrome 93+ to demo new multi-screen features");
   } else {
     screen.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
@@ -25,36 +25,39 @@ window.addEventListener('load', async () => {
 });
 
 function setScreenListeners() {
-  let screens = screensInterface ? screensInterface.screens : [ window.screen ];
+  let screens = screenDetails ? screenDetails.screens : [ window.screen ];
   for (const s of screens)
     s.onchange = () => { updateScreens(/*requestPermission=*/false); };
 }
 
-async function getScreensWithWarningAndFallback(requestPermission) {
-  if ('getScreens' in self) {
-    if (!screensInterface && (permissionStatus.state === 'granted' ||
+async function getScreenDetailsWithWarningAndFallback(requestPermission) {
+  if ('getScreens' in self || 'getScreenDetails' in self) {
+    if (!screenDetails && (permissionStatus.state === 'granted' ||
                               (permissionStatus.state === 'prompt' && requestPermission))) {
-      screensInterface = await getScreens().catch((e)=>{ console.error(e); return null; });
-      if (screensInterface) {
-        screensInterface.addEventListener('screenschange', () => { updateScreens(/*requestPermission=*/false); setScreenListeners(); });
+      if ('getScreenDetails' in self)
+        screenDetails = await getScreenDetails().catch((e)=>{ console.error(e); return null; });
+      else if ('getScreens' in self)
+        screenDetails = await getScreens().catch((e)=>{ console.error(e); return null; });
+      if (screenDetails) {
+        screenDetails.addEventListener('screenschange', () => { updateScreens(/*requestPermission=*/false); setScreenListeners(); });
         setScreenListeners();
       }
     }
-    if (screensInterface && screensInterface.screens.length > 1)
+    if (screenDetails && screenDetails.screens.length > 1)
       showWarning();  // Clear any warning.
-    else if (screensInterface && screensInterface.screens.length == 1)
+    else if (screenDetails && screenDetails.screens.length == 1)
       showWarning("Please extend your desktop over multiple screens for full demo functionality");
     else if (requestPermission || permissionStatus.state === 'denied')
       showWarning("Please allow the Window Placement permission for full demo functionality");
 
-    if (screensInterface) {
-      // console.log("INFO: Detected " + screensInterface.screens.length + " screens:");
-      // for (let i = 0; i < screensInterface.screens.length; ++i) {
-      //   const s = screensInterface.screens[i];
+    if (screenDetails) {
+      // console.log("INFO: Detected " + screenDetails.screens.length + " screens:");
+      // for (let i = 0; i < screenDetails.screens.length; ++i) {
+      //   const s = screenDetails.screens[i];
       //   console.log(`[${i}] (${s.left},${s.top} ${s.width}x${s.height}) isExtended:${s.isExtended}` +
       //               `isPrimary:${s.isPrimary} isInternal:${s.isInternal}`);
       // }
-      return screensInterface.screens;
+      return screenDetails.screens;
     }
   }
 
@@ -108,7 +111,7 @@ async function showScreens(screens) {
 }
 
 async function updateScreens(requestPermission = true) {
-  const screens = await getScreensWithWarningAndFallback(requestPermission);
+  const screens = await getScreenDetailsWithWarningAndFallback(requestPermission);
   showScreens(screens);
 
   if (document.getElementById("toggle-fullscreen-dropdown")) {

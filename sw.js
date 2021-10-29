@@ -45,7 +45,7 @@ self.addEventListener('fetch', function(event) {
 //   let url = './slide.html'
 
 //   // TODO: Expose screen information for service workers?
-//   // const screensInterface = await self.getScreens();
+//   // const screensInterface = await self.getScreenDetails();
 
 //   // TODO: Support options in Service Worker's clients.openWindow()?
 //   // let options = { x:      screensInterface.screens[0].left,

@@ -18,6 +18,7 @@ window.addEventListener('load', async () => {
     showWarning("Please use Chrome 93+ to demo new multi-screen features");
   } else {
     screen.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
+    window.addEventListener('resize', () => { updateScreens(/*requestPermission=*/false); });
     permissionStatus = await navigator.permissions.query({name:'window-placement'});
     permissionStatus.addEventListener('change', (p) => { permissionStatus = p; updateScreens(/*requestPermission=*/false); });
   }
@@ -54,8 +55,9 @@ async function getScreenDetailsWithWarningAndFallback(requestPermission) {
       // console.log("INFO: Detected " + screenDetails.screens.length + " screens:");
       // for (let i = 0; i < screenDetails.screens.length; ++i) {
       //   const s = screenDetails.screens[i];
-      //   console.log(`[${i}] (${s.left},${s.top} ${s.width}x${s.height}) isExtended:${s.isExtended}` +
-      //               `isPrimary:${s.isPrimary} isInternal:${s.isInternal}`);
+      //   console.log(`[${i}] "${s.label}" (${s.left},${s.top} ${s.width}x${s.height}) ` +
+      //               `devicePixelRatio:${screen.devicePixelRatio} colorDepth:${screen.colorDepth} ` +
+      //               `isExtended:${s.isExtended} isPrimary:${s.isPrimary} isInternal:${s.isInternal}`);
       // }
       return screenDetails.screens;
     }
@@ -89,23 +91,27 @@ async function showScreens(screens) {
   scale = Math.min(canvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
                    canvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top),
                    0.5);
-  const colors = [ "#FF8888", "#88FF88", "#8888FF" ];
+  const colors = [ "#FF2222", "#22FF22", "#2222FF" ];
+  const availColors = [ "#FFAAAA", "#AAFFAA", "#AAAAFF" ];
   for (let i = 0; i < screens.length; ++i) {
     const screen = screens[i];
     const rect = { left:(screen.left-origin.left)*scale, top:(screen.top-origin.top)*scale, width:screen.width*scale, height:screen.height*scale };
     context.fillStyle = colors[i%colors.length];
     context.fillRect(rect.left, rect.top, rect.width, rect.height);
+    const availrect = { left:(screen.availLeft-origin.left)*scale, top:(screen.availTop-origin.top)*scale, width:screen.availWidth*scale, height:screen.availHeight*scale };
+    context.fillStyle = availColors[i%colors.length];
+    context.fillRect(availrect.left, availrect.top, availrect.width, availrect.height);
     context.fillStyle = "#000000";
-    context.font = "15px Arial";
-    context.fillText(`[${screen == window.screen ? 'window.screen' : i}] ${screen.left},${screen.top} ${screen.width}x${screen.height} ${screen.isPrimary ? '(Primary)': ''}`, rect.left+10, rect.top+20);
-    context.fillText(`scaleFactor:${screen.scaleFactor}, colorDepth:${screen.colorDepth}`, rect.left+10, rect.top+40);
-    if (screen == window.screen)
-      context.fillText(`isExtended:${screen.isExtended}`, rect.left+10, rect.top+60);
-    else
-      context.fillText(`isExtended:${screen.isExtended} isPrimary:${screen.isPrimary} isInternal:${screen.isInternal}`, rect.left+10, rect.top+60);
+    context.font = "13px Arial";
+    context.fillText(screen == window.screen ? '[window.screen]' : `[${i}] "${screen.label}" ${screen.isPrimary ? '(Primary)': ''}`, rect.left+10, rect.top+20);
+    context.fillText(`${screen.left},${screen.top} ${screen.width}x${screen.height}`, rect.left+10, rect.top+35);
+    context.fillText(`devicePixelRatio:${screen.devicePixelRatio}, colorDepth:${screen.colorDepth}`, rect.left+10, rect.top+50);
+    context.fillText(`isExtended:${screen.isExtended}` + (screen == window.screen ? `` : `, isInternal:${screen.isInternal}`), rect.left+10, rect.top+65);
   }
 
   const rect = { left:(window.screenLeft-origin.left)*scale, top:(window.screenTop-origin.top)*scale, width:window.outerWidth*scale, height:window.outerHeight*scale };
+  context.strokeStyle = "#444444";
+  context.fillStyle = "#444444";
   context.strokeRect(rect.left, rect.top, rect.width, rect.height);
   context.fillText(`window ${window.screenLeft},${window.screenTop} ${window.outerWidth}x${window.outerHeight}`, rect.left+10, rect.top+rect.height-10);
 }
@@ -117,7 +123,6 @@ async function updateScreens(requestPermission = true) {
   if (document.getElementById("toggle-fullscreen-dropdown")) {
     let buttons = `<button onclick="toggleFullscreen()">Current Screen</button>` +
                   `<button onclick="updateScreens()">Get Screens</button>`;
-    // TODO(msw): Use screen.id and not indices.
     for (let i = 0; i < screens.length; ++i)
       buttons += screens[i] == window.screen ? `` : `<button onclick="toggleFullscreen(${i})"> Screen ${i}</button>`;
     document.getElementById("toggle-fullscreen-dropdown").innerHTML = buttons;
@@ -125,7 +130,6 @@ async function updateScreens(requestPermission = true) {
   if (document.getElementById("fullscreen-slide-dropdown")) {
     let buttons = `<button onclick="fullscreenSlide()">Current Screen</button>` +
                   `<button onclick="updateScreens()">Get Screens</button>`;
-    // TODO(msw): Use screen.id and not indices.
     for (let i = 0; i < screens.length; ++i)
       buttons += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlide(${i})"> Screen ${i}</button>`;
     document.getElementById("fullscreen-slide-dropdown").innerHTML = buttons;
@@ -133,7 +137,6 @@ async function updateScreens(requestPermission = true) {
   if (document.getElementById("fullscreen-slide-and-open-notes-window-dropdown")) {
     let buttons = `<button onclick="fullscreenSlideAndOpenNotesWindow()">Current Screen</button>` +
                   `<button onclick="updateScreens()">Get Screens</button>`;
-    // TODO(msw): Use screen.id and not indices.
     for (let i = 0; i < screens.length; ++i)
       buttons += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlideAndOpenNotesWindow(${i})"> Screen ${i}</button>`;
     document.getElementById("fullscreen-slide-and-open-notes-window-dropdown").innerHTML = buttons;
@@ -207,7 +210,6 @@ async function toggleElementFullscreen(element, screenId) {
   const screens = await updateScreens(/*requestPermission=*/false);
   if (screens.length > 1 && screenId < screens.length) {
     console.log('Info: Requesting fullscreen on another screen.');
-    // TODO(msw): Use screen.id and not an index.
     fullscreenOptions.screen = screens[screenId];
   }
   element.requestFullscreen(fullscreenOptions);

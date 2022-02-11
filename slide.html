@@ -16,10 +16,10 @@
 <h3 style="margin-left:20px; color:#444;">Demo: <a href="https://github.com/michaelwasserman/window-placement-demo">github.com/michaelwasserman/window-placement-demo</a></h3>
 <pre style="margin-left:30px; margin-right:30px; padding-top:10px; padding-bottom:10px; background-color:#eee">
   document.getElementById('show-slides').onclick = async function() {
-    const screensInterface = await self.getScreens();
+    const screenDetails = await self.getScreenDetails();
     let fullscreenOptions = { navigationUI: "auto" };
-    console.log("screen.length: " + screensInterface.screens.length);
-    for (s of screensInterface.screens) {
+    console.log("screen.length: " + screenDetails.screens.length);
+    for (s of screenDetails.screens) {
       console.log(`[${s.id}] ${s.left},${s.top} ${s.width}x${s.height} ` +
                   `isPrimary:${s.isPrimary}, isInternal:${s.isInternal}`);
       if (!s.isInternal)

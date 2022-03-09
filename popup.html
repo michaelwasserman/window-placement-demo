@@ -2,10 +2,6 @@
 <head>
   <title>Popup: Multi-Screen Window Placement Demo</title>
   <link rel="stylesheet" href="style.css">
-  <!-- https://developer.chrome.com/origintrials/#/view_trial/-8087339030850568191 Multi-Screen Window Placement token for http://localhost:8000 -->
-  <meta http-equiv="origin-trial" content="AoRpcETf+l7boUzcNxv6NTZOBDX93NurmsoHO7MvKhXKn1HXzmAOoBIaRjHSeNiqHF8UXeYY8o/OXb8xwDNbLggAAABVeyJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjgwMDAiLCJmZWF0dXJlIjoiV2luZG93UGxhY2VtZW50T1QyIiwiZXhwaXJ5IjoxNjM5NTI2Mzk5fQ==">
-  <!-- https://developer.chrome.com/origintrials/#/view_trial/-8087339030850568191 Multi-Screen Window Placement token for https://michaelwasserman.github.io -->
-  <meta http-equiv="origin-trial" content="AsHgze5gMTODb06oK5IUt1n14dM6STuL7EP7mnz4T3c5jrFjLKuISsQuhXrUdQ8jocPs9j35w7QhfafNBgab7wQAAABmeyJvcmlnaW4iOiJodHRwczovL21pY2hhZWx3YXNzZXJtYW4uZ2l0aHViLmlvOjQ0MyIsImZlYXR1cmUiOiJXaW5kb3dQbGFjZW1lbnRPVDIiLCJleHBpcnkiOjE2Mzk1MjYzOTl9">
 </head>
 <body>
 
@@ -14,36 +10,36 @@
 <h4 id="warning" hidden=true style="color: red;"></h4>
 <div class="controls">
   <div style="display:flex; align-items:center;">
-    <button id="update-screens">Update screens</button>
-    <button id="move-to">Move window to</button>
-    left: <input id="move-to-left" style="width:50px;" size=5 value="100" type="number"></input>
-    top: <input id="move-to-top" style="width:50px;" size=5 value="50" type="number"></input>
-    <button id="resize-to">Resize window to</button>
-    width: <input id="resize-to-width" style="width:50px;" size=5 value="720" type="number"></input>
-    height: <input id="resize-to-height" style="width:50px;" size=5 value="525" type="number"></input>
+    <button id="updateScreensButton">Update screens</button>
+    <button id="moveToButton">Move window to</button>
+    left: <input id="moveToLeftInput" style="width:50px;" size=5 value="100" type="number"></input>
+    top: <input id="moveToTopInput" style="width:50px;" size=5 value="50" type="number"></input>
+    <button id="resizeToButton">Resize window to</button>
+    width: <input id="resizeToWidthInput" style="width:50px;" size=5 value="720" type="number"></input>
+    height: <input id="resizeToHeightInput" style="width:50px;" size=5 value="525" type="number"></input>
   </div>
 </div>
 <p></p>
-<canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
+<canvas id="screensCanvas" width="800" height="600" style="border-style: solid"></canvas>
 </div>
 
 <script src="main.js"></script>
 <script>
 'use strict';
 window.addEventListener('load', () => {
-  document.getElementById('move-to-left').value = window.screenLeft;
-  document.getElementById('move-to-top').value = window.screenTop;
-  document.getElementById('resize-to-width').value = window.outerWidth;
-  document.getElementById('resize-to-height').value = window.outerHeight;
+  document.getElementById('moveToLeftInput').value = window.screenLeft;
+  document.getElementById('moveToTopInput').value = window.screenTop;
+  document.getElementById('resizeToWidthInput').value = window.outerWidth;
+  document.getElementById('resizeToHeightInput').value = window.outerHeight;
 
   // Handle control button clicks and input events.
-  document.getElementById("update-screens").addEventListener('click', updateScreens);
-  document.getElementById("move-to").addEventListener('click', () => {
-    window.moveTo(document.getElementById('move-to-left').value, document.getElementById('move-to-top').value);
+  document.getElementById("updateScreensButton").addEventListener('click', updateScreens);
+  document.getElementById("moveToButton").addEventListener('click', () => {
+    window.moveTo(document.getElementById('moveToLeftInput').value, document.getElementById('moveToTopInput').value);
     updateScreens(/*requestPermission=*/false);
   });
-  document.getElementById("resize-to").addEventListener('click', () => {
-    window.resizeTo(document.getElementById('resize-to-width').value, document.getElementById('resize-to-height').value);
+  document.getElementById("resizeToButton").addEventListener('click', () => {
+    window.resizeTo(document.getElementById('resizeToWidthInput').value, document.getElementById('resizeToHeightInput').value);
     updateScreens(/*requestPermission=*/false);
   });
 });

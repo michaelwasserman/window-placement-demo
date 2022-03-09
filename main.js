@@ -4,10 +4,9 @@ let permissionStatus = null;
 let screenDetails = null;
 
 function showWarning(text) {
-  let warning = document.getElementById("warning");
   if (warning) {
     warning.hidden = !text;
-    warning.innerText = text;
+    warning.innerHTML = text;
   }
   if (text)
     console.error(text);
@@ -15,7 +14,7 @@ function showWarning(text) {
 
 window.addEventListener('load', async () => {
   if (!('getScreenDetails' in self || 'getScreens' in self) || !('isExtended' in screen) || !('onchange' in screen)) {
-    showWarning("Please use Chrome 93+ to demo new multi-screen features");
+    showWarning("Please try a browser that supports multi-screen features; see the <a href='https://github.com/michaelwasserman/window-placement-demo#instructions'>demo instructions</a>");
   } else {
     screen.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
     window.addEventListener('resize', () => { updateScreens(/*requestPermission=*/false); });
@@ -55,8 +54,10 @@ async function getScreenDetailsWithWarningAndFallback(requestPermission) {
       // console.log("INFO: Detected " + screenDetails.screens.length + " screens:");
       // for (let i = 0; i < screenDetails.screens.length; ++i) {
       //   const s = screenDetails.screens[i];
-      //   console.log(`[${i}] "${s.label}" (${s.left},${s.top} ${s.width}x${s.height}) ` +
-      //               `devicePixelRatio:${screen.devicePixelRatio} colorDepth:${screen.colorDepth} ` +
+      //   console.log(`[${i}] "${s.label}" ` +
+      //               `[${s.left},${s.top} ${s.width}x${s.height}] ` +
+      //               `(${s.availLeft},${s.availTop} ${s.availWidth}x${s.availHeight}) ` +
+      //               `devicePixelRatio:${s.devicePixelRatio} colorDepth:${s.colorDepth} ` +
       //               `isExtended:${s.isExtended} isPrimary:${s.isPrimary} isInternal:${s.isInternal}`);
       // }
       return screenDetails.screens;
@@ -75,9 +76,8 @@ async function showScreens(screens) {
       screen.top = screen.availTop;
   }
 
-  const canvas = document.getElementById('screens-canvas');
-  const context = canvas.getContext('2d');
-  context.clearRect(0, 0, canvas.width, canvas.height);
+  const context = screensCanvas.getContext('2d');
+  context.clearRect(0, 0, screensCanvas.width, screensCanvas.height);
 
   let scale = 1.0/10.0;
   let screen_space = { left:0, top:0, right:0, bottom:0 };
@@ -88,8 +88,8 @@ async function showScreens(screens) {
     screen_space.bottom = Math.max(screen_space.bottom, screen.top + screen.height);
   }
   let origin = { left:screen_space.left, top:screen_space.top };
-  scale = Math.min(canvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
-                   canvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top),
+  scale = Math.min(screensCanvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
+                   screensCanvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top),
                    0.5);
   const colors = [ "#FF2222", "#22FF22", "#2222FF" ];
   const availColors = [ "#FFAAAA", "#AAFFAA", "#AAAAFF" ];
@@ -120,26 +120,23 @@ async function updateScreens(requestPermission = true) {
   const screens = await getScreenDetailsWithWarningAndFallback(requestPermission);
   showScreens(screens);
 
-  if (document.getElementById("toggle-fullscreen-dropdown")) {
-    let buttons = `<button onclick="toggleFullscreen()">Current Screen</button>` +
-                  `<button onclick="updateScreens()">Get Screens</button>`;
+  if (toggleFullscreenDropdown) {
+    while (toggleFullscreenDropdown.children.length > 2)
+      toggleFullscreenDropdown.children[2].remove();
     for (let i = 0; i < screens.length; ++i)
-      buttons += screens[i] == window.screen ? `` : `<button onclick="toggleFullscreen(${i})"> Screen ${i}</button>`;
-    document.getElementById("toggle-fullscreen-dropdown").innerHTML = buttons;
+      toggleFullscreenDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="toggleFullscreen(${i})"> Screen ${i}</button>`;
   }
-  if (document.getElementById("fullscreen-slide-dropdown")) {
-    let buttons = `<button onclick="fullscreenSlide()">Current Screen</button>` +
-                  `<button onclick="updateScreens()">Get Screens</button>`;
+  if (fullscreenSlideDropdown) {
+    while (fullscreenSlideDropdown.children.length > 2)
+      fullscreenSlideDropdown.children[2].remove();
     for (let i = 0; i < screens.length; ++i)
-      buttons += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlide(${i})"> Screen ${i}</button>`;
-    document.getElementById("fullscreen-slide-dropdown").innerHTML = buttons;
+      fullscreenSlideDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlide(${i})"> Screen ${i}</button>`;
   }
-  if (document.getElementById("fullscreen-slide-and-open-notes-window-dropdown")) {
-    let buttons = `<button onclick="fullscreenSlideAndOpenNotesWindow()">Current Screen</button>` +
-                  `<button onclick="updateScreens()">Get Screens</button>`;
+  if (fullscreenSlideAndOpenNotesWindowDropdown) {
+    while (fullscreenSlideAndOpenNotesWindowDropdown.children.length > 2)
+      fullscreenSlideAndOpenNotesWindowDropdown.children[2].remove();
     for (let i = 0; i < screens.length; ++i)
-      buttons += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlideAndOpenNotesWindow(${i})"> Screen ${i}</button>`;
-    document.getElementById("fullscreen-slide-and-open-notes-window-dropdown").innerHTML = buttons;
+      fullscreenSlideAndOpenNotesWindowDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlideAndOpenNotesWindow(${i})"> Screen ${i}</button>`;
   }
   return screens;
 }
@@ -150,12 +147,12 @@ function getFeaturesFromOptions(options) {
 }
 
 function openWindow() {
-  const url = document.getElementById('open-window-url').value;
+  const url = openWindowUrlInput.value;
   const options = {
-    x: document.getElementById('open-window-left').value,
-    y: document.getElementById('open-window-top').value,
-    width: document.getElementById('open-window-width').value,
-    height: document.getElementById('open-window-height').value,
+    x: openWindowLeftInput.value,
+    y: openWindowTopInput.value,
+    width: openWindowWidthInput.value,
+    height: openWindowHeightInput.value,
   };
   // TODO: Support openWindow(options) if available.
   window.open(url, '_blank', getFeaturesFromOptions(options));
@@ -163,10 +160,10 @@ function openWindow() {
 
 // TODO: Add some worthwhile multi-window opening example?
 // async function openWindows() {
-//   let count = document.getElementById('open-windows-count').value;
+//   let count = openWindowsCountInput.value;
 //   const screens = await updateScreens(/*requestPermission=*/false);
 //   const per_screen = Math.ceil(count / screens.length);
-//   console.log(`MSW: openWindows count:${count}, screens:${screens.length}, per_screen:${per_screen}`);
+//   console.log(`openWindows count:${count}, screens:${screens.length}, per_screen:${per_screen}`);
 //   for (const s of screens) {
 //     const cols = Math.ceil(Math.sqrt(per_screen));
 //     const rows = Math.ceil(per_screen / cols);
@@ -184,17 +181,6 @@ function openWindow() {
 //       }
 //     }
 //   }
-// }
-
-// function showNotification() {
-//   Notification.requestPermission(function(result) {
-//     if (result !== 'denied') { // result: 'allowed' / 'denied' / 'default'
-//       navigator.serviceWorker.ready.then(function(registration) {
-//         // Show notification; user clicks trigger "notificationclick".
-//         registration.showNotification('Click to open a window!');
-//       });
-//     }
-//   });
 // }
 
 async function toggleElementFullscreen(element, screenId) {
@@ -269,7 +255,7 @@ async function openSlideAndNotesWindows() {
 }
 
 async function fullscreenSlide(screenId) {
-  toggleElementFullscreen(document.getElementById('slide'), screenId);
+  toggleElementFullscreen(slideIframe, screenId);
 }
 
 async function fullscreenSlideAndOpenNotesWindow(screenId) {

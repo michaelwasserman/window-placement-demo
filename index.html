@@ -5,60 +5,54 @@
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <meta name="theme-color" content="#757575"/>
-  <!-- https://developer.chrome.com/origintrials/#/view_trial/-8087339030850568191 Multi-Screen Window Placement token for http://localhost:8000 -->
-  <meta http-equiv="origin-trial" content="AoRpcETf+l7boUzcNxv6NTZOBDX93NurmsoHO7MvKhXKn1HXzmAOoBIaRjHSeNiqHF8UXeYY8o/OXb8xwDNbLggAAABVeyJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjgwMDAiLCJmZWF0dXJlIjoiV2luZG93UGxhY2VtZW50T1QyIiwiZXhwaXJ5IjoxNjM5NTI2Mzk5fQ==">
-  <!-- https://developer.chrome.com/origintrials/#/view_trial/-8087339030850568191 Multi-Screen Window Placement token for https://michaelwasserman.github.io -->
-  <meta http-equiv="origin-trial" content="AsHgze5gMTODb06oK5IUt1n14dM6STuL7EP7mnz4T3c5jrFjLKuISsQuhXrUdQ8jocPs9j35w7QhfafNBgab7wQAAABmeyJvcmlnaW4iOiJodHRwczovL21pY2hhZWx3YXNzZXJtYW4uZ2l0aHViLmlvOjQ0MyIsImZlYXR1cmUiOiJXaW5kb3dQbGFjZW1lbnRPVDIiLCJleHBpcnkiOjE2Mzk1MjYzOTl9">
 </head>
 <body>
 <h3>Multi-Screen Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>, <a href="https://www.chromestatus.com/feature/5252960583942144">ChromeStatus</a>)</h3>
 <h4 id="warning" hidden=true style="color: red;"></h4>
 <div class="controls">
   <div style="display:flex; align-items:center;">
-    <button id="open-window">Open window</button>
-    URL: <input id="open-window-url" style="flex-grow:1;" value="./popup.html"></input>
-    left: <input id="open-window-left" style="width:50px;" size=5 value="100" type="number"></input>
-    top: <input id="open-window-top" style="width:50px;" size=5 value="50" type="number"></input>
-    width: <input id="open-window-width" style="width:50px;" size=5 value="830" type="number"></input>
-    height: <input id="open-window-height" style="width:50px;" size=5 value="750" type="number"></input>
-    <!-- Options: <input id="open-window-options" style="flex-grow:10;" value='{"x":"100", "y":"50", "width":"400", "height":"200", "type":"window"}'></input> -->
+    <button id="openWindowButton">Open window</button>
+    URL: <input id="openWindowUrlInput" style="flex-grow:1;" value="./popup.html"></input>
+    left: <input id="openWindowLeftInput" style="width:50px;" size=5 value="100" type="number"></input>
+    top: <input id="openWindowTopInput" style="width:50px;" size=5 value="50" type="number"></input>
+    width: <input id="openWindowWidthInput" style="width:50px;" size=5 value="830" type="number"></input>
+    height: <input id="openWindowHeightInput" style="width:50px;" size=5 value="750" type="number"></input>
   </div>
-  <button id="update-screens">Update screens</button>
-  <!-- <button id="open-windows">Open <input id="open-windows-count" style="width:20px;padding:0px;margin:0px" size=2 value="5" type="number" min=1 max=9></input> windows</button> -->
-  <!-- <button id="show-notification">Show notification</button> -->
+  <button id="updateScreensButton">Update screens</button>
+  <!-- <button id="openWindowsButton">Open <input id="openWindowsCountInput" style="width:20px;padding:0px;margin:0px" size=2 value="5" type="number" min=1 max=9></input> windows</button> -->
   <div class="dropdown">
-    <button id="toggle-fullscreen">Toggle fullscreen</button>
-    <div class="dropdown-content" hidden=true id="toggle-fullscreen-dropdown">
-      <button id="toggle-fullscreen-on-current-screen">Current screen</button>
-      <button id="toggle-fullscreen-get-screens">Get screens</button>
+    <button id="toggleFullscreenButton">Toggle fullscreen</button>
+    <div class="dropdownContent" hidden=true id="toggleFullscreenDropdown">
+      <button id="toggleFullscreenOnCurrentScreenButton">Current screen</button>
+      <button id="toggleFullscreenGetScreenDetailsButton">Update screens</button>
     </div>
   </div>
   <div class="dropdown">
-    <button id="open-slide-and-notes-windows">Open slide & notes</button>
-    <div class="dropdown-content" hidden=true id="open-slide-and-notes-windows-dropdown">
-      <button id="open-slide-window">Slide window</button>
-      <button id="open-notes-window">Notes window</button>
+    <button id="openSlideAndNotesWindowsButton">Open slide & notes</button>
+    <div class="dropdownContent" hidden=true id="openSlideAndNotesWindowsDropdown">
+      <button id="openSlideWindowButton">Slide window</button>
+      <button id="openNotesWindowButton">Notes window</button>
     </div>
   </div>
   <div class="dropdown">
-    <button id="fullscreen-slide">Fullscreen slide
-      <iframe id="slide" class="slide" src="./slide.html"></iframe>
+    <button id="fullscreenSlideButton">Fullscreen slide
+      <iframe id="slideIframe" class="slide" src="./slide.html"></iframe>
     </button>
-    <div class="dropdown-content" hidden=true id="fullscreen-slide-dropdown">
-      <button id="fullscreen-slide-on-current-screen">Current screen</button>
-      <button id="fullscreen-slide-get-screens">Get screens</button>
+    <div class="dropdownContent" hidden=true id="fullscreenSlideDropdown">
+      <button id="fullscreenSlideOnCurrentScreenButton">Current screen</button>
+      <button id="fullscreenSlideGetScreenDetailsButton">Update screens</button>
     </div>
   </div>
   <div class="dropdown">
-    <button id="fullscreen-slide-and-open-notes-window">Fullscreen slide and open notes</button>
-    <div class="dropdown-content" hidden=true id="fullscreen-slide-and-open-notes-window-dropdown">
-      <button id="fullscreen-slide-and-open-notes-window-on-current-screen">Current screen</button>
-      <button id="fullscreen-slide-and-open-notes-window-get-screens">Get screens</button>
+    <button id="fullscreenSlideAndOpenNotesWindowButton">Fullscreen slide and open notes</button>
+    <div class="dropdownContent" hidden=true id="fullscreenSlideAndOpenNotesWindowDropdown">
+      <button id="fullscreenSlideAndOpenNotesWindowOnCurrentScreenButton">Current screen</button>
+      <button id="fullscreenSlideAndOpenNotesWindowGetScreenDetailsButton">Update screens</button>
     </div>
   </div>
 </div>
 <p></p>
-<canvas id="screens-canvas" width="800" height="600" style="border-style: solid"></canvas>
+<canvas id="screensCanvas" width="800" height="600" style="border-style: solid"></canvas>
 <!-- Testing of iframe functionality and permissions:
   <iframe src="https://michaelwasserman.github.io/window-placement-demo/" style="width:800; height:600;" allow="fullscreen;window-placement"></iframe>
   <iframe src="https://permission.site" style="width:800; height:600;" allow="fullscreen;geolocation;window-placement"></iframe>
@@ -73,22 +67,21 @@ window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js');
 
   // Handle control button clicks and input events.
-  document.getElementById("open-window").addEventListener('click', openWindow);
-  // document.getElementById("open-windows").addEventListener('click', openWindows);
-  document.getElementById("update-screens").addEventListener('click', updateScreens);
-  // document.getElementById("show-notification").addEventListener('click', showNotification);
-  document.getElementById("toggle-fullscreen").addEventListener('click', toggleFullscreen);
-  document.getElementById("toggle-fullscreen-on-current-screen").addEventListener('click', toggleFullscreen);
-  document.getElementById("toggle-fullscreen-get-screens").addEventListener('click', updateScreens);
-  document.getElementById("open-slide-window").addEventListener('click', openSlideWindow);
-  document.getElementById("open-notes-window").addEventListener('click', openNotesWindow);
-  document.getElementById("open-slide-and-notes-windows").addEventListener('click', openSlideAndNotesWindows);
-  document.getElementById("fullscreen-slide").addEventListener('click', fullscreenSlide);
-  document.getElementById("fullscreen-slide-on-current-screen").addEventListener('click', fullscreenSlide);
-  document.getElementById("fullscreen-slide-get-screens").addEventListener('click', updateScreens);
-  document.getElementById("fullscreen-slide-and-open-notes-window").addEventListener('click', fullscreenSlideAndOpenNotesWindow);
-  document.getElementById("fullscreen-slide-and-open-notes-window-on-current-screen").addEventListener('click', fullscreenSlideAndOpenNotesWindow);
-  document.getElementById("fullscreen-slide-and-open-notes-window-get-screens").addEventListener('click', updateScreens);
+  openWindowButton.addEventListener('click', openWindow);
+  updateScreensButton.addEventListener('click', updateScreens);
+  // openWindowsButton.addEventListener('click', openWindows);
+  toggleFullscreenButton.addEventListener('click', toggleFullscreen);
+  toggleFullscreenOnCurrentScreenButton.addEventListener('click', toggleFullscreen);
+  toggleFullscreenGetScreenDetailsButton.addEventListener('click', updateScreens);
+  openSlideWindowButton.addEventListener('click', openSlideWindow);
+  openNotesWindowButton.addEventListener('click', openNotesWindow);
+  openSlideAndNotesWindowsButton.addEventListener('click', openSlideAndNotesWindows);
+  fullscreenSlideButton.addEventListener('click', fullscreenSlide);
+  fullscreenSlideOnCurrentScreenButton.addEventListener('click', fullscreenSlide);
+  fullscreenSlideGetScreenDetailsButton.addEventListener('click', updateScreens);
+  fullscreenSlideAndOpenNotesWindowButton.addEventListener('click', fullscreenSlideAndOpenNotesWindow);
+  fullscreenSlideAndOpenNotesWindowOnCurrentScreenButton.addEventListener('click', fullscreenSlideAndOpenNotesWindow);
+  fullscreenSlideAndOpenNotesWindowGetScreenDetailsButton.addEventListener('click', updateScreens);
 });
 </script>
 </html>

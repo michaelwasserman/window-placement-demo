@@ -27,34 +27,3 @@ self.addEventListener('fetch', function(event) {
     })
   );
 });
-
-// self.addEventListener('message', function(event){
-//   console.log("INFO: service worker message: " + event.data);
-//   if (event.data.sender === "open-window-button") {
-//     open_window(event);
-//   }
-// });
-
-// self.addEventListener('notificationclick', async function(event) {
-//   console.log("INFO: service worker notificationclick");
-//   open_window(event)
-//   event.notification.close();
-// });
-
-// function open_window(event) {
-//   let url = './slide.html'
-
-//   // TODO: Expose screen information for service workers?
-//   // const screensInterface = await self.getScreenDetails();
-
-//   // TODO: Support options in Service Worker's clients.openWindow()?
-//   // let options = { x:      screensInterface.screens[0].left,
-//   //                 y:      screensInterface.screens[0].top,
-//   //                 width:  screensInterface.screens[0].width,
-//   //                 height: screensInterface.screens[0].height,
-//   //                 type:  "window" }
-//   // clients.openWindow('./slide.html', options);
-
-//   console.log("INFO: Calling openWindow(" + url + /*"," + JSON.stringify(options) +*/ ")");
-//   return clients.openWindow('./slide.html');
-// }

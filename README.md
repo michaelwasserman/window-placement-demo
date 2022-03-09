@@ -21,7 +21,7 @@ Run the demo at https://michaelwasserman.github.io/window-placement-demo
 ```console
 $ git clone https://github.com/michaelwasserman/window-placement-demo.git
 $ cd window-placement-demo
-$ python -m SimpleHTTPServer &
+$ python -m http.server &
 $ chrome --enable-blink-features=WindowPlacement -- "http://localhost:8000"
 ```
 

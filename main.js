@@ -120,19 +120,19 @@ async function updateScreens(requestPermission = true) {
   const screens = await getScreenDetailsWithWarningAndFallback(requestPermission);
   showScreens(screens);
 
-  if (toggleFullscreenDropdown) {
+  if (document.getElementById('toggleFullscreenDropdown')) {
     while (toggleFullscreenDropdown.children.length > 2)
       toggleFullscreenDropdown.children[2].remove();
     for (let i = 0; i < screens.length; ++i)
       toggleFullscreenDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="toggleFullscreen(${i})"> Screen ${i}</button>`;
   }
-  if (fullscreenSlideDropdown) {
+  if (document.getElementById('fullscreenSlideDropdown')) {
     while (fullscreenSlideDropdown.children.length > 2)
       fullscreenSlideDropdown.children[2].remove();
     for (let i = 0; i < screens.length; ++i)
       fullscreenSlideDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlide(${i})"> Screen ${i}</button>`;
   }
-  if (fullscreenSlideAndOpenNotesWindowDropdown) {
+  if (document.getElementById('fullscreenSlideAndOpenNotesWindowDropdown')) {
     while (fullscreenSlideAndOpenNotesWindowDropdown.children.length > 2)
       fullscreenSlideAndOpenNotesWindowDropdown.children[2].remove();
     for (let i = 0; i < screens.length; ++i)

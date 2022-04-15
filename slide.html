@@ -7,7 +7,7 @@
 <div style="text-align:center;">
 <div style="background-color:lightgrey; display:inline-block; text-align:left; width:700px;">
 <h1 style="margin-top:40px; margin-left:20px;">Multi-Screen Window Placement Demo</h1>
-<h3 style="margin-left:20px; color:#444;">Proposal: <a href="https://github.com/w3c/window-placement">github.com/w3c/window-placement</a></h3>
+<h3 style="margin-left:20px; color:#444;">APIs: <a href="https://github.com/w3c/window-placement">github.com/w3c/window-placement</a></h3>
 <p style="margin-left:50px; margin-right:50px; color:#555;">Abstract: As multi-display computing becomes a more common and critical part of user experiences, it becomes more important to give web developers information and tools to leverage that expanded visual environment.</p>
 <h3 style="margin-left:20px; color:#444;">Demo: <a href="https://github.com/michaelwasserman/window-placement-demo">github.com/michaelwasserman/window-placement-demo</a></h3>
 <pre style="margin-left:30px; margin-right:30px; padding-top:10px; padding-bottom:10px; background-color:#eee">
@@ -26,6 +26,13 @@
 </pre>
 </div>
 </div>
+
+<script>
+'use strict';
+window.addEventListener('load', () => {
+  window.addEventListener('keyup', (e) => { if (e.key === "Escape") window.close(); });
+});
+</script>
 
 </body>
 </html>

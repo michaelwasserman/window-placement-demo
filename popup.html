@@ -27,6 +27,8 @@
 <script>
 'use strict';
 window.addEventListener('load', () => {
+  window.addEventListener('keyup', (e) => { if (e.key === "Escape") window.close(); });
+
   document.getElementById('moveToLeftInput').value = window.screenLeft;
   document.getElementById('moveToTopInput').value = window.screenTop;
   document.getElementById('resizeToWidthInput').value = window.outerWidth;

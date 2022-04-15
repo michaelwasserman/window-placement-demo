@@ -121,20 +121,17 @@ async function updateScreens(requestPermission = true) {
   showScreens(screens);
 
   if (document.getElementById('toggleFullscreenDropdown')) {
-    while (toggleFullscreenDropdown.children.length > 2)
-      toggleFullscreenDropdown.children[2].remove();
+    toggleFullscreenDropdown.innerHTML = ``;
     for (let i = 0; i < screens.length; ++i)
       toggleFullscreenDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="toggleFullscreen(${i})"> Screen ${i}</button>`;
   }
   if (document.getElementById('fullscreenSlideDropdown')) {
-    while (fullscreenSlideDropdown.children.length > 2)
-      fullscreenSlideDropdown.children[2].remove();
+    fullscreenSlideDropdown.innerHTML = ``;
     for (let i = 0; i < screens.length; ++i)
       fullscreenSlideDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlide(${i})"> Screen ${i}</button>`;
   }
   if (document.getElementById('fullscreenSlideAndOpenNotesWindowDropdown')) {
-    while (fullscreenSlideAndOpenNotesWindowDropdown.children.length > 2)
-      fullscreenSlideAndOpenNotesWindowDropdown.children[2].remove();
+    fullscreenSlideAndOpenNotesWindowDropdown.innerHTML = ``;
     for (let i = 0; i < screens.length; ++i)
       fullscreenSlideAndOpenNotesWindowDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlideAndOpenNotesWindow(${i})"> Screen ${i}</button>`;
   }
@@ -188,21 +185,20 @@ async function toggleElementFullscreen(element, screenId) {
     if (document.fullscreenElement == element)
       document.exitFullscreen();
     else
-      element.requestFullscreen();
+      await element.requestFullscreen();
     return;
   }
 
   let fullscreenOptions = { navigationUI: "auto" };
   const screens = await updateScreens(/*requestPermission=*/false);
-  if (screens.length > 1 && screenId < screens.length) {
-    console.log('Info: Requesting fullscreen on another screen.');
+  if (screens.length > 1 && screenId < screens.length)
     fullscreenOptions.screen = screens[screenId];
-  }
-  element.requestFullscreen(fullscreenOptions);
+  console.log('INFO: Requesting fullscreen on screen: ' + screenId);
+  await element.requestFullscreen(fullscreenOptions);
 }
 
 async function toggleFullscreen(screenId) {
-  toggleElementFullscreen(document.documentElement, screenId);
+  await toggleElementFullscreen(document.documentElement, screenId);
 }
 
 async function openSlideWindow(screenId) {
@@ -250,17 +246,33 @@ async function openNotesWindow(screenId) {
 }
 
 async function openSlideAndNotesWindows() {
-  openSlideWindow();
-  openNotesWindow();
+  const slides_window = await openSlideWindow();
+  const notes_window = await openNotesWindow();
+  const interval = setInterval(() => {
+    if (slides_window.closed || notes_window.closed) {
+      slides_window.close();
+      notes_window.close();
+      clearInterval(interval);
+    }
+  }, 300);
 }
 
 async function fullscreenSlide(screenId) {
-  toggleElementFullscreen(slideIframe, screenId);
+  await toggleElementFullscreen(slideIframe, screenId);
 }
 
 async function fullscreenSlideAndOpenNotesWindow(screenId) {
   if (typeof(screenId) != "number")
     screenId = 0;
-  fullscreenSlide(screenId);
-  openNotesWindow(screenId == 0 ? 1 : 0);
+  await fullscreenSlide(screenId);
+  const notes_window = await openNotesWindow(screenId == 0 ? 1 : 0);
+  const interval = setInterval(() => {
+    if (!document.fullscreenElement && !notes_window.closed) {
+      notes_window.close();
+      clearInterval(interval);
+    } else if (notes_window.closed && document.fullscreenElement) {
+      document.exitFullscreen();
+      clearInterval(interval);
+    }
+  }, 300);
 }

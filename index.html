@@ -10,7 +10,7 @@
 <h3>Multi-Screen Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>, <a href="https://www.chromestatus.com/feature/5252960583942144">ChromeStatus</a>)</h3>
 <h4 id="warning" hidden=true style="color: red;"></h4>
 <div class="controls">
-  <div style="display:flex; align-items:center;">
+  <div id="openWindowControls" style="display:flex; align-items:center;">
     <button id="openWindowButton">Open window</button>
     URL: <input id="openWindowUrlInput" style="flex-grow:1;" value="./popup.html"></input>
     left: <input id="openWindowLeftInput" style="width:50px;" size=5 value="100" type="number"></input>
@@ -22,10 +22,7 @@
   <!-- <button id="openWindowsButton">Open <input id="openWindowsCountInput" style="width:20px;padding:0px;margin:0px" size=2 value="5" type="number" min=1 max=9></input> windows</button> -->
   <div class="dropdown">
     <button id="toggleFullscreenButton">Toggle fullscreen</button>
-    <div class="dropdownContent" hidden=true id="toggleFullscreenDropdown">
-      <button id="toggleFullscreenOnCurrentScreenButton">Current screen</button>
-      <button id="toggleFullscreenGetScreenDetailsButton">Update screens</button>
-    </div>
+    <div class="dropdownContent" hidden=true id="toggleFullscreenDropdown"></div>
   </div>
   <div class="dropdown">
     <button id="openSlideAndNotesWindowsButton">Open slide & notes</button>
@@ -38,17 +35,11 @@
     <button id="fullscreenSlideButton">Fullscreen slide
       <iframe id="slideIframe" class="slide" src="./slide.html"></iframe>
     </button>
-    <div class="dropdownContent" hidden=true id="fullscreenSlideDropdown">
-      <button id="fullscreenSlideOnCurrentScreenButton">Current screen</button>
-      <button id="fullscreenSlideGetScreenDetailsButton">Update screens</button>
-    </div>
+    <div class="dropdownContent" hidden=true id="fullscreenSlideDropdown"></div>
   </div>
   <div class="dropdown">
     <button id="fullscreenSlideAndOpenNotesWindowButton">Fullscreen slide and open notes</button>
-    <div class="dropdownContent" hidden=true id="fullscreenSlideAndOpenNotesWindowDropdown">
-      <button id="fullscreenSlideAndOpenNotesWindowOnCurrentScreenButton">Current screen</button>
-      <button id="fullscreenSlideAndOpenNotesWindowGetScreenDetailsButton">Update screens</button>
-    </div>
+    <div class="dropdownContent" hidden=true id="fullscreenSlideAndOpenNotesWindowDropdown"></div>
   </div>
 </div>
 <p></p>
@@ -68,20 +59,15 @@ window.addEventListener('load', () => {
 
   // Handle control button clicks and input events.
   openWindowButton.addEventListener('click', openWindow);
+  openWindowControls.addEventListener('keyup', (e) => { if (e.key === "Enter") openWindow(); });
   updateScreensButton.addEventListener('click', updateScreens);
   // openWindowsButton.addEventListener('click', openWindows);
   toggleFullscreenButton.addEventListener('click', toggleFullscreen);
-  toggleFullscreenOnCurrentScreenButton.addEventListener('click', toggleFullscreen);
-  toggleFullscreenGetScreenDetailsButton.addEventListener('click', updateScreens);
   openSlideWindowButton.addEventListener('click', openSlideWindow);
   openNotesWindowButton.addEventListener('click', openNotesWindow);
   openSlideAndNotesWindowsButton.addEventListener('click', openSlideAndNotesWindows);
   fullscreenSlideButton.addEventListener('click', fullscreenSlide);
-  fullscreenSlideOnCurrentScreenButton.addEventListener('click', fullscreenSlide);
-  fullscreenSlideGetScreenDetailsButton.addEventListener('click', updateScreens);
   fullscreenSlideAndOpenNotesWindowButton.addEventListener('click', fullscreenSlideAndOpenNotesWindow);
-  fullscreenSlideAndOpenNotesWindowOnCurrentScreenButton.addEventListener('click', fullscreenSlideAndOpenNotesWindow);
-  fullscreenSlideAndOpenNotesWindowGetScreenDetailsButton.addEventListener('click', updateScreens);
 });
 </script>
 </html>

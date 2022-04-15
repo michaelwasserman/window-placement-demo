@@ -2,8 +2,8 @@
 
 ## Abstract
 
-This is a basic demo of the proposed
-[Multi-Screen Window Placement](https://github.com/webscreens/window-placement) APIs.
+This is a basic demo of
+[Multi-Screen Window Placement](https://github.com/w3c/window-placement) APIs.
 * Visualize the set of connected displays
 * Open or move a popup window onto any connected display
 * Request fullscreen on any connected display
@@ -12,7 +12,7 @@ This is a basic demo of the proposed
 ## Instructions
 
 Run the demo at https://michaelwasserman.github.io/window-placement-demo
-* Use Chrome 100+ (which enables the Multi-Screen Window Placement API by default)
+* Use Chrome 100+ (which enables Multi-Screen Window Placement APIs by default)
 * Or use Chrome 93+ and enable chrome://flags#enable-experimental-web-platform-features
 * Or use Chrome 93+ and run chrome --enable-blink-features=WindowPlacement
 * Or use Chrome 100+ and run chrome --enable-features=WindowPlacement
@@ -22,7 +22,7 @@ Run the demo at https://michaelwasserman.github.io/window-placement-demo
 $ git clone https://github.com/michaelwasserman/window-placement-demo.git
 $ cd window-placement-demo
 $ python -m http.server &
-$ chrome --enable-blink-features=WindowPlacement -- "http://localhost:8000"
+$ chrome -- "http://localhost:8000"
 ```
 
 To simulate multiple displays with
@@ -30,7 +30,7 @@ To simulate multiple displays with
 builds, use
 [--ash-host-window-bounds](https://cs.chromium.org/chromium/src/ui/display/display_switches.cc?type=cs&q=ash-host-window-bounds&sq=package:chromium&g=0&l=34-40):
 ```console
-$ out/cros_Default/chrome --enable-blink-features=WindowPlacement --ash-host-window-bounds=1280x960,1285+0-1280x960 -- "http://localhost:8000"
+$ out/cros_Default/chrome --ash-host-window-bounds=1280x960,1285+0-1280x960 -- "http://localhost:8000"
 ```
 
 ## Screen Capture

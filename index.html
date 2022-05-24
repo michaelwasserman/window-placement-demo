@@ -57,6 +57,9 @@ window.addEventListener('load', () => {
   if ('serviceWorker' in navigator)
     navigator.serviceWorker.register('./sw.js');
 
+  // Handle messages (e.g. fullscreen capability delegation from popup.html).
+  window.addEventListener('message', handleWindowMessage);
+
   // Handle control button clicks and input events.
   openWindowButton.addEventListener('click', openWindow);
   openWindowControls.addEventListener('keyup', (e) => { if (e.key === "Enter") openWindow(); });

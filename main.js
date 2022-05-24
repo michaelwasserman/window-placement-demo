@@ -4,12 +4,12 @@ let permissionStatus = null;
 let screenDetails = null;
 
 function showWarning(text) {
+  if (text && (warning.innerHTML !== text || warning.hidden))
+    console.error(text);
   if (warning) {
     warning.hidden = !text;
     warning.innerHTML = text;
   }
-  if (text)
-    console.error(text);
 }
 
 window.addEventListener('load', async () => {
@@ -32,8 +32,8 @@ function setScreenListeners() {
 
 async function getScreenDetailsWithWarningAndFallback(requestPermission) {
   if ('getScreens' in self || 'getScreenDetails' in self) {
-    if (!screenDetails && (permissionStatus.state === 'granted' ||
-                              (permissionStatus.state === 'prompt' && requestPermission))) {
+    if (!screenDetails && ((permissionStatus && permissionStatus.state === 'granted') ||
+                           (permissionStatus && permissionStatus.state === 'prompt' && requestPermission))) {
       if ('getScreenDetails' in self)
         screenDetails = await getScreenDetails().catch((e)=>{ console.error(e); return null; });
       else if ('getScreens' in self)
@@ -135,6 +135,11 @@ async function updateScreens(requestPermission = true) {
     for (let i = 0; i < screens.length; ++i)
       fullscreenSlideAndOpenNotesWindowDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="fullscreenSlideAndOpenNotesWindow(${i})"> Screen ${i}</button>`;
   }
+  if (document.getElementById('fullscreenOpenerDropdown')) {
+    fullscreenOpenerDropdown.innerHTML = ``;
+    for (let i = 0; i < screens.length; ++i)
+      fullscreenOpenerDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="fullscreenOpener(${i})"> Screen ${i}</button>`;
+  }
   return screens;
 }
 
@@ -181,20 +186,17 @@ function openWindow() {
 // }
 
 async function toggleElementFullscreen(element, screenId) {
-  if (typeof(screenId) != "number") {  // Ignore EventListener's event args.
-    if (document.fullscreenElement == element)
-      document.exitFullscreen();
-    else
-      await element.requestFullscreen();
-    return;
-  }
-
-  let fullscreenOptions = { navigationUI: "auto" };
   const screens = await updateScreens(/*requestPermission=*/false);
-  if (screens.length > 1 && screenId < screens.length)
-    fullscreenOptions.screen = screens[screenId];
-  console.log('INFO: Requesting fullscreen on screen: ' + screenId);
-  await element.requestFullscreen(fullscreenOptions);
+  if (Number.isInteger(screenId) && screenId >= 0 && screenId < screens.length) {
+    console.log('INFO: Requesting fullscreen on screen: ' + screenId);
+    await element.requestFullscreen({ screen: screens[screenId] });
+  } else if (document.fullscreenElement == element) {
+    console.log('INFO: Exiting fullscreen');
+    document.exitFullscreen();
+  } else {
+    console.log('INFO: Requesting fullscreen');
+    await element.requestFullscreen();
+  }
 }
 
 async function toggleFullscreen(screenId) {
@@ -207,7 +209,7 @@ async function openSlideWindow(screenId) {
                   width:screen.availWidth, height:screen.availHeight/2 };
   if (screens && screens.length > 1) {
     let screen = screens[1];
-    if (typeof(screenId) == "number" && screenId >= 0 && screenId < screens.length)
+    if (Number.isInteger(screenId) && screenId >= 0 && screenId < screens.length)
       screen = screens[screenId];
     options = { x:screen.availLeft, y:screen.availTop,
                 width:screen.availWidth, height:screen.availHeight };
@@ -229,7 +231,7 @@ async function openNotesWindow(screenId) {
                   width:screen.availWidth, height:screen.availHeight/2 };
   if (screens && screens.length > 1) {
     let screen = screens[0];
-    if (typeof(screenId) == "number" && screenId >= 0 && screenId < screens.length)
+    if (Number.isInteger(screenId) && screenId >= 0 && screenId < screens.length)
       screen = screens[screenId];
     options = { x:screen.availLeft, y:screen.availTop,
                 width:screen.availWidth, height:screen.availHeight };
@@ -248,13 +250,15 @@ async function openNotesWindow(screenId) {
 async function openSlideAndNotesWindows() {
   const slides_window = await openSlideWindow();
   const notes_window = await openNotesWindow();
-  const interval = setInterval(() => {
-    if (slides_window.closed || notes_window.closed) {
-      slides_window.close();
-      notes_window.close();
-      clearInterval(interval);
-    }
-  }, 300);
+  if (slides_window && notes_window) {
+    const interval = setInterval(() => {
+      if (slides_window.closed || notes_window.closed) {
+        slides_window.close();
+        notes_window.close();
+        clearInterval(interval);
+      }
+    }, 300);
+  }
 }
 
 async function fullscreenSlide(screenId) {
@@ -262,17 +266,32 @@ async function fullscreenSlide(screenId) {
 }
 
 async function fullscreenSlideAndOpenNotesWindow(screenId) {
-  if (typeof(screenId) != "number")
+  if (!Number.isInteger(screenId) || screenId < 0 || screenId >= screens.length)
     screenId = 0;
   await fullscreenSlide(screenId);
   const notes_window = await openNotesWindow(screenId == 0 ? 1 : 0);
-  const interval = setInterval(() => {
-    if (!document.fullscreenElement && !notes_window.closed) {
-      notes_window.close();
-      clearInterval(interval);
-    } else if (notes_window.closed && document.fullscreenElement) {
-      document.exitFullscreen();
-      clearInterval(interval);
-    }
-  }, 300);
+  if (notes_window) {
+    const interval = setInterval(() => {
+      if (!document.fullscreenElement && !notes_window.closed) {
+        notes_window.close();
+        clearInterval(interval);
+      } else if (notes_window.closed && document.fullscreenElement) {
+        document.exitFullscreen();
+        clearInterval(interval);
+      }
+    }, 300);
+  }
+}
+
+async function handleWindowMessage(messageEvent) {
+  const messageData = messageEvent.data.split(":");
+  if (messageData[0] === "request-fullscreen" && messageData.length == 2)
+    toggleFullscreen(parseInt(messageData[1]));
+}
+
+async function fullscreenOpener(screenId) {
+  // Capability Delegation allows a frame to delegate its transient user
+  // activation so another frame can request fullscreen, via postMessage.
+  // Here, a popup window button delegates a fullscreen request to its opener.
+  window.opener.postMessage("request-fullscreen:" + screenId, { targetOrigin: window.origin, delegate: "fullscreen" });
 }

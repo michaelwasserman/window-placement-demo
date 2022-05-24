@@ -11,6 +11,10 @@
 <div class="controls">
   <div style="display:flex; align-items:center;">
     <button id="updateScreensButton">Update screens</button>
+    <div class="dropdown">
+      <button id="fullscreenOpenerButton">Fullscreen opener</button>
+      <div class="dropdownContent" hidden=true id="fullscreenOpenerDropdown"></div>
+    </div>
     <button id="moveToButton">Move window to</button>
     left: <input id="moveToLeftInput" style="width:50px;" size=5 value="100" type="number"></input>
     top: <input id="moveToTopInput" style="width:50px;" size=5 value="50" type="number"></input>
@@ -29,19 +33,20 @@
 window.addEventListener('load', () => {
   window.addEventListener('keyup', (e) => { if (e.key === "Escape") window.close(); });
 
-  document.getElementById('moveToLeftInput').value = window.screenLeft;
-  document.getElementById('moveToTopInput').value = window.screenTop;
-  document.getElementById('resizeToWidthInput').value = window.outerWidth;
-  document.getElementById('resizeToHeightInput').value = window.outerHeight;
+  moveToLeftInput.value = window.screenLeft;
+  moveToTopInput.value = window.screenTop;
+  resizeToWidthInput.value = window.outerWidth;
+  resizeToHeightInput.value = window.outerHeight;
 
   // Handle control button clicks and input events.
-  document.getElementById("updateScreensButton").addEventListener('click', updateScreens);
-  document.getElementById("moveToButton").addEventListener('click', () => {
-    window.moveTo(document.getElementById('moveToLeftInput').value, document.getElementById('moveToTopInput').value);
+  updateScreensButton.addEventListener('click', updateScreens);
+  fullscreenOpenerButton.addEventListener('click', fullscreenOpener);
+  moveToButton.addEventListener('click', () => {
+    window.moveTo(moveToLeftInput.value, moveToTopInput.value);
     updateScreens(/*requestPermission=*/false);
   });
-  document.getElementById("resizeToButton").addEventListener('click', () => {
-    window.resizeTo(document.getElementById('resizeToWidthInput').value, document.getElementById('resizeToHeightInput').value);
+  resizeToButton.addEventListener('click', () => {
+    window.resizeTo(resizeToWidthInput.value, resizeToHeightInput.value);
     updateScreens(/*requestPermission=*/false);
   });
 });

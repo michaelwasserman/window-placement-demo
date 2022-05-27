@@ -38,7 +38,7 @@ window.addEventListener('load', () => {
 
   // Handle control button clicks and input events.
   updateScreensButton.addEventListener('click', updateScreens);
-  fullscreenOpenerButton.addEventListener('click', fullscreenOpenerAndDodge);
+  fullscreenOpenerButton.addEventListener('click', fullscreenOpenerAndMoveThisPopup);
   moveToButton.addEventListener('click', () => {
     window.moveTo(moveToLeftInput.value, moveToTopInput.value);
     updateScreens(/*requestPermission=*/false);

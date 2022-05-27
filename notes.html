@@ -21,10 +21,10 @@ textarea { width:99%; height:99%; border-radius: 5px; }
 .notes { grid-column: 2; grid-row: 2; }
 </style>
 
+<script src="main.js"></script>
 <script>
 'use strict';
 window.addEventListener('load', () => {
-  window.addEventListener('keyup', (e) => { if (e.key === "Escape") window.close(); });
   let timer = 0;
   setInterval(() => {
     let pad = (i) => { return (i < 10 ? "0" : "") + i; }

@@ -61,8 +61,7 @@ window.addEventListener('load', () => {
   window.addEventListener('message', handleWindowMessage);
 
   // Handle control button clicks and input events.
-  openWindowButton.addEventListener('click', () => { openWindow(null); });
-  openWindowControls.addEventListener('keyup', (e) => { if (e.key === "Enter") openWindow(null); });
+  openWindowButton.addEventListener('click', openWindow);
   updateScreensButton.addEventListener('click', updateScreens);
   // openWindowsButton.addEventListener('click', openWindows);
   toggleFullscreenButton.addEventListener('click', toggleFullscreen);

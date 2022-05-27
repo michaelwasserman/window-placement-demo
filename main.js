@@ -85,16 +85,16 @@ async function showScreens(screens) {
   context.clearRect(0, 0, screensCanvas.width, screensCanvas.height);
 
   let scale = 1.0/10.0;
-  let screen_space = { left:0, top:0, right:0, bottom:0 };
+  let screenSpace = { left:0, top:0, right:0, bottom:0 };
   for (const screen of screens) {
-    screen_space.left = Math.min(screen_space.left, screen.left);
-    screen_space.top = Math.min(screen_space.top, screen.top);
-    screen_space.right = Math.max(screen_space.right, screen.left + screen.width);
-    screen_space.bottom = Math.max(screen_space.bottom, screen.top + screen.height);
+    screenSpace.left = Math.min(screenSpace.left, screen.left);
+    screenSpace.top = Math.min(screenSpace.top, screen.top);
+    screenSpace.right = Math.max(screenSpace.right, screen.left + screen.width);
+    screenSpace.bottom = Math.max(screenSpace.bottom, screen.top + screen.height);
   }
-  let origin = { left:screen_space.left, top:screen_space.top };
-  scale = Math.min(screensCanvas.getBoundingClientRect().width / (screen_space.right-screen_space.left),
-                   screensCanvas.getBoundingClientRect().height / (screen_space.bottom-screen_space.top),
+  let origin = { left:screenSpace.left, top:screenSpace.top };
+  scale = Math.min(screensCanvas.getBoundingClientRect().width / (screenSpace.right-screenSpace.left),
+                   screensCanvas.getBoundingClientRect().height / (screenSpace.bottom-screenSpace.top),
                    0.5);
   const colors = [ "#FF2222", "#22FF22", "#2222FF" ];
   const availColors = [ "#FFAAAA", "#AAFFAA", "#AAAAFF" ];
@@ -155,7 +155,7 @@ function getFeaturesFromOptions(options) {
 }
 
 function openWindow(options = null) {
-  if (!options) {
+  if (!options || !options.url) {
     options = {
       url: openWindowUrlInput.value,
       x: openWindowLeftInput.value,
@@ -172,7 +172,7 @@ function openWindow(options = null) {
   if (popup) {
     popupObserverInterval = setInterval(() => {
       if (popup.closed) {
-        console.log('INFO: The latest popup opened was closed');
+        console.log('INFO: The latest-opened popup was closed');
         clearInterval(popupObserverInterval);
         popupObserverInterval = null;
         popup = null;
@@ -186,11 +186,11 @@ function openWindow(options = null) {
 // async function openWindows() {
 //   let count = openWindowsCountInput.value;
 //   const screens = await getScreenDetailsWithWarningAndFallback();
-//   const per_screen = Math.ceil(count / screens.length);
-//   console.log(`openWindows count:${count}, screens:${screens.length}, per_screen:${per_screen}`);
+//   const perScreen = Math.ceil(count / screens.length);
+//   console.log(`openWindows count:${count}, screens:${screens.length}, perScreen:${perScreen}`);
 //   for (const s of screens) {
-//     const cols = Math.ceil(Math.sqrt(per_screen));
-//     const rows = Math.ceil(per_screen / cols);
+//     const cols = Math.ceil(Math.sqrt(perScreen));
+//     const rows = Math.ceil(perScreen / cols);
 //     for (r = 0; r < rows; ++r) {
 //       for (c = 0; c < cols && count-- > 0; ++c) {
 //         const options = {
@@ -282,9 +282,9 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
   if (notesWindow) {
     const interval = setInterval(() => {
       if (!document.fullscreenElement && !notesWindow.closed) {
-        notesWindow.close(); 
+        notesWindow.close();
         clearInterval(interval);
-      } else if (notesWindow.closed && document.fullscreenElement) {
+      } else if (document.fullscreenElement && notesWindow.closed) {
         document.exitFullscreen();
         clearInterval(interval);
       }
@@ -295,20 +295,25 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
 async function handleWindowMessage(messageEvent) {
   const messageData = messageEvent.data.split(":");
   if (messageData[0] === "request-fullscreen" && messageData.length == 2) {
+    // Another window requested delegation of the fullscreen capability to this window; attempt to use it.
     const element = document.fullscreenElement ? document.fullscreenElement : document.documentElement;
     await toggleElementFullscreen(element, parseInt(messageData[1]));
   }
 }
 
 async function handleWindowKeyup(keyEvent) {
+  // If the event targeted a same-origin iframe, allow the parent to handle it instead.
   if (window !== window.parent && window.parent.origin === window.origin) {
     window.parent.handleWindowKeyup(keyEvent);
     return;
   }
 
   if (keyEvent.code === "Escape" && !["/", "/index.html"].includes(window.location.pathname)) {
-    window.close();  // Close secondary windows when pressing [Esc].
+    window.close();  // Close auxiliary windows on [Esc].
+  } else if (keyEvent.code === "Enter" && openWindowControls && openWindowControls.contains(keyEvent.target)) {
+    openWindow();  // Open a window when on [Enter] targeting an "Open window" input element.
   } else if (keyEvent.code === "KeyS" && screen.isExtended) {
+    // Initiate a fullscreen + popup multi-screen experience, or swap their screens on [s].
     if (popup && !popup.closed)
       fullscreenThisWindowAndMovePopup();
     else if (opener && !opener.closed)
@@ -316,12 +321,12 @@ async function handleWindowKeyup(keyEvent) {
     else
       fullscreenSlideAndOpenNotesWindow();
   }
- }
+}
 
 function isWindowOnScreen(w, s) {
-  const center = { x: w.screenLeft + w.outerWidth / 2, 
+  const center = { x: w.screenLeft + w.outerWidth / 2,
                    y: w.screenTop + w.outerHeight / 2 };
-  return center.x >= s.left && (center.x < s.left + s.width) && 
+  return center.x >= s.left && (center.x < s.left + s.width) &&
          center.y >= s.top && (center.y < s.top + s.height);
 }
 
@@ -384,7 +389,7 @@ async function fullscreenThisWindowAndMovePopup() {
   if (document.fullscreenElement && fullscreenTargetId == fullscreenId)
     fullscreenTargetId = (fullscreenTargetId + 1) % screenDetails.screens.length;
 
-  const popupTargetScreen = screenDetails.currentScreen; 
+  const popupTargetScreen = screenDetails.currentScreen;
   const popupTargetScreenId = screenDetails.screens.indexOf(popupTargetScreen);
 
   const element = document.fullscreenElement ? document.fullscreenElement : document.documentElement;
@@ -407,9 +412,6 @@ async function fullscreenOpenerAndMoveThisPopup(screenId = null) {
     screenId = screens.indexOf(screenDetails.currentScreen);
   const openerScreenDetails = await opener.getScreenDetails();
   const openerId = openerScreenDetails.screens.indexOf(openerScreenDetails.currentScreen);
-  // If the opener is already fullscreen, make sure the request targets another screen.
-  if (opener.document.fullscreenElement)
-    screenId = (openerId == screenId) ? ((screenId + 1) % screens.length) : screenId;
 
   // Delegate this window's transient user activation so the opener can request fullscreen.
   opener.postMessage("request-fullscreen:" + screenId,

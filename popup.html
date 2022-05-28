@@ -31,8 +31,6 @@
 <script>
 'use strict';
 window.addEventListener('load', () => {
-  window.addEventListener('keyup', (e) => { if (e.key === "Escape") window.close(); });
-
   moveToLeftInput.value = window.screenLeft;
   moveToTopInput.value = window.screenTop;
   resizeToWidthInput.value = window.outerWidth;
@@ -40,7 +38,7 @@ window.addEventListener('load', () => {
 
   // Handle control button clicks and input events.
   updateScreensButton.addEventListener('click', updateScreens);
-  fullscreenOpenerButton.addEventListener('click', fullscreenOpener);
+  fullscreenOpenerButton.addEventListener('click', fullscreenOpenerAndMoveThisPopup);
   moveToButton.addEventListener('click', () => {
     window.moveTo(moveToLeftInput.value, moveToTopInput.value);
     updateScreens(/*requestPermission=*/false);

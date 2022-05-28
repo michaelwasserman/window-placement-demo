@@ -167,8 +167,8 @@ function openWindow(options = null) {
   if (popupObserverInterval)
     clearInterval(popupObserverInterval);
   const features = getFeaturesFromOptions(options);
-  console.log('INFO: Opening popup with features: ' + features);
   popup = window.open(options.url, '_blank', features);
+  console.log('INFO: Requested popup with features: "' + features + '" result: ' + popup);
   if (popup) {
     popupObserverInterval = setInterval(() => {
       if (popup.closed) {
@@ -293,11 +293,13 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
 }
 
 async function handleWindowMessage(messageEvent) {
-  const messageData = messageEvent.data.split(":");
-  if (messageData[0] === "request-fullscreen" && messageData.length == 2) {
-    // Another window requested delegation of the fullscreen capability to this window; attempt to use it.
+  if (typeof(messageEvent.data) === "object" && messageEvent.data.capability === "fullscreen") {
+    // Request to use a fullscreen capability delegated by another window; reply with the result.
     const element = document.fullscreenElement ? document.fullscreenElement : document.documentElement;
-    await toggleElementFullscreen(element, parseInt(messageData[1]));
+    console.log("INFO: Requesting fullscreen via delegated capability");
+    toggleElementFullscreen(element, messageEvent.data.targetScreenId)
+      .then(() => { messageEvent.source.postMessage(true); })
+      .catch(() => { messageEvent.source.postMessage(false); });
   }
 }
 
@@ -318,33 +320,32 @@ async function handleWindowKeyup(keyEvent) {
       fullscreenThisWindowAndMovePopup();
     else if (opener && !opener.closed)
       fullscreenOpenerAndMoveThisPopup();
-    else
+    else if (document.getElementById("slideIframe"))
       fullscreenSlideAndOpenNotesWindow();
   }
 }
 
-function isWindowOnScreen(w, s) {
+async function isWindowOnScreen(w, screenId) {
+  const windowScreenDetails = await w.getScreenDetails();
+  const screen = windowScreenDetails.screens[screenId];
   const center = { x: w.screenLeft + w.outerWidth / 2,
                    y: w.screenTop + w.outerHeight / 2 };
-  return center.x >= s.left && (center.x < s.left + s.width) &&
-         center.y >= s.top && (center.y < s.top + s.height);
+  return center.x >= screen.left && (center.x < screen.left + screen.width) &&
+         center.y >= screen.top && (center.y < screen.top + screen.height) &&
+         windowScreenDetails.currentScreen == screen;
 }
 
-function waitForWindowOnScreen(w, s, resolve, reject) {
-  if (!w || w.closed || !s)
-    reject();
-  else if (isWindowOnScreen(w, s))
-    resolve();
+async function waitForWindowOnScreen(w, screenId, resolve, timestamp = Date.now()) {
+  if (!w || w.closed || Date.now() - timestamp > 3000)
+    resolve(false);
+  else if (await isWindowOnScreen(w, screenId))
+    resolve(true);
   else
-    setTimeout(waitForWindowOnScreen.bind(this, w, s, resolve, reject), 100);
+    setTimeout(waitForWindowOnScreen.bind(this, w, screenId, resolve, timestamp), 100);
 }
 
 async function ensureWindowIsOnScreen(w, screenId) {
-  const screens = await getScreenDetailsWithWarningAndFallback();
-  if (!Number.isInteger(screenId) || screenId < 0 || screenId >= screens.length)
-    screenId = 0;
-  const s = screens[screenId];
-  return new Promise((resolve, reject) => { waitForWindowOnScreen(w, s, resolve, reject); });
+  return new Promise(resolve => { waitForWindowOnScreen(w, screenId, resolve); });
 }
 
 async function movePopupToScreen(p, screenId) {
@@ -358,12 +359,13 @@ async function movePopupToScreen(p, screenId) {
   const popupScreenDetails = await p.getScreenDetails();
   const popupScreen = popupScreenDetails.currentScreen;
 
+  console.log("INFO: Moving popup to screen: " + screenId);
   if (Math.abs(p.outerWidth - popupScreen.availWidth) < fillError &&
       Math.abs(p.outerHeight - popupScreen.availHeight) < fillError) {
     p.moveTo(s.availLeft, s.availTop);
     // Wait for the window to be moved to the target screen, and then resize it to fill.
-    await ensureWindowIsOnScreen(p, screenId);
-    p.resizeTo(s.availWidth, s.availHeight);
+    if (await ensureWindowIsOnScreen(p, screenId))
+      p.resizeTo(s.availWidth, s.availHeight);
   } else {
     const w = p.outerWidth;
     const h = p.outerHeight;
@@ -389,15 +391,26 @@ async function fullscreenThisWindowAndMovePopup() {
   if (document.fullscreenElement && fullscreenTargetId == fullscreenId)
     fullscreenTargetId = (fullscreenTargetId + 1) % screenDetails.screens.length;
 
-  const popupTargetScreen = screenDetails.currentScreen;
-  const popupTargetScreenId = screenDetails.screens.indexOf(popupTargetScreen);
-
   const element = document.fullscreenElement ? document.fullscreenElement : document.documentElement;
   await toggleElementFullscreen(element, fullscreenTargetId);
   await ensureWindowIsOnScreen(window, fullscreenTargetId);
 
+  const popupTargetScreenId = (screens[fullscreenId] === screenDetails.currentScreen) ? ((fullscreenId + 1) % screens.length) : fullscreenId;
   await movePopupToScreen(popup, popupTargetScreenId);
-  await ensureWindowIsOnScreen(popup, popupTargetScreenId);
+}
+
+async function delegateFullscreen(w, screenId) {
+  return new Promise((resolve) => {
+    console.log('INFO: Requesting to delegate a fullscreen request capability');
+    window.addEventListener('message', (messageEvent) => {
+      if (typeof(messageEvent.data) === 'boolean') {
+        console.log('INFO Target window reported fullscreen delegation result: ' + messageEvent.data);
+        resolve(messageEvent.data);
+      }
+    }, { once: true });
+    w.postMessage({ capability: 'fullscreen', targetScreenId: screenId },
+                  { targetOrigin: window.origin, delegate: 'fullscreen' });
+  });
 }
 
 // Make the opener fullscreen on the target screen (or this popup's screen, or a fallback).
@@ -414,16 +427,13 @@ async function fullscreenOpenerAndMoveThisPopup(screenId = null) {
   const openerId = openerScreenDetails.screens.indexOf(openerScreenDetails.currentScreen);
 
   // Delegate this window's transient user activation so the opener can request fullscreen.
-  opener.postMessage("request-fullscreen:" + screenId,
-                     { targetOrigin: window.origin, delegate: "fullscreen" });
-  // Move this window to another screen if the opener will be made fullscreen on its current screen.
-  if (screens[screenId] === screenDetails.currentScreen) {
-    // Wait for the opener to actually move to the target screen.
-    await ensureWindowIsOnScreen(opener, screenId);
-
-    // Move to the opener's original screen, or the next available screen.
-    const popupTargetScreenId = (openerId == screenId) ? ((screenId + 1) % screens.length) : openerId;
-    await movePopupToScreen(window, popupTargetScreenId);
-    await ensureWindowIsOnScreen(window, popupTargetScreenId);
+  // Wait for the opener to actually move to the target screen if it reports successful delegation.
+  if (await delegateFullscreen(opener, screenId) && await ensureWindowIsOnScreen(opener, screenId)) {
+    // If the opener was made fullscreen on the same screen as this popup.
+    if (screens[screenId] === screenDetails.currentScreen) {
+      // Move this popup to the opener's previous screen, or the next available screen.
+      const popupTargetScreenId = (screens[openerId] === screenDetails.currentScreen) ? ((openerId + 1) % screens.length) : openerId;
+      await movePopupToScreen(window, popupTargetScreenId);
+    }
   }
 }

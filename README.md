@@ -17,6 +17,16 @@ Run the demo at https://michaelwasserman.github.io/window-placement-demo
 * Or use Chrome 93+ and run chrome --enable-blink-features=WindowPlacement
 * Or use Chrome 100+ and run chrome --enable-features=WindowPlacement
 
+Enable some API enhancements with command-line switches in Chrome 103+:
+* Fullscreen Companion Window - https://chromestatus.com/feature/5173162437246976
+  * Permits requesting fullscreen and opening a popup from one user activation
+  * Click 'Fullscreen slide an open notes' or press the "s" key with 2+ screens
+  * chrome --enable-features=WindowPlacementFullscreenCompanionWindow
+* Fullscreen Capability Delegation - https://chromestatus.com/feature/6441688242323456
+  * Permits a frame to delegate a fullscreen request capability to another frame
+  * Click 'Fullscreen opener' or press the "s" key on a popup with 2+ screens
+  * chrome --enable-blink-features=CapabilityDelegationFullscreenRequest
+
 **[Optional]** Host this demo locally and run it:
 ```console
 $ git clone https://github.com/michaelwasserman/window-placement-demo.git

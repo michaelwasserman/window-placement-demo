@@ -310,7 +310,7 @@ async function handleWindowKeyup(keyEvent) {
     return;
   }
 
-  if (keyEvent.code === "Escape" && !["/", "/index.html"].includes(window.location.pathname)) {
+  if (keyEvent.code === "Escape" && !["/index.html", "/window-placement-demo/"].includes(window.location.pathname)) {
     window.close();  // Close auxiliary windows on [Esc].
   } else if (keyEvent.code === "Enter" && openWindowControls && openWindowControls.contains(keyEvent.target)) {
     openWindow();  // Open a window when on [Enter] targeting an "Open window" input element.

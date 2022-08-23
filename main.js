@@ -309,12 +309,14 @@ async function handleWindowKeyup(keyEvent) {
     window.parent.handleWindowKeyup(keyEvent);
     return;
   }
+  
+  const isHome = ["/index.html", "/window-placement-demo/"].includes(window.location.pathname);
 
-  if (keyEvent.code === "Escape" && !["/index.html", "/window-placement-demo/"].includes(window.location.pathname)) {
+  if (keyEvent.code === "Escape" && !isHome) {
     window.close();  // Close auxiliary windows on [Esc].
   } else if (keyEvent.code === "Enter" && openWindowControls && openWindowControls.contains(keyEvent.target)) {
     openWindow();  // Open a window when on [Enter] targeting an "Open window" input element.
-  } else if (keyEvent.code === "KeyS" && screen.isExtended) {
+  } else if (keyEvent.code === "KeyS" && screen.isExtended && !isHome) {
     // Initiate a fullscreen + popup multi-screen experience, or swap their screens on [s].
     if (popup && !popup.closed)
       fullscreenThisWindowAndMovePopup();

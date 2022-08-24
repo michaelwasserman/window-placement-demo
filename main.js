@@ -7,16 +7,16 @@ let popupObserverInterval = null;
 
 function showWarning(text) {
   const warning = document.getElementById('warning');
-  if (text && (warning.innerHTML !== text || warning.hidden))
-    console.error(text);
-  if (warning) {
+  if (warning && warning.innerHTML !== text) {
+    if (text)
+      console.error(text);
     warning.hidden = !text;
     warning.innerHTML = text;
   }
 }
 
 window.addEventListener('load', async () => {
-  if (!('getScreenDetails' in self || 'getScreens' in self) || !('isExtended' in screen) || !('onchange' in screen)) {
+  if (!('getScreenDetails' in self) || !('isExtended' in screen) || !('onchange' in screen)) {
     showWarning("Please try a browser that supports multi-screen features; see the <a href='https://github.com/michaelwasserman/window-placement-demo#instructions'>demo instructions</a>");
   } else {
     screen.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
@@ -36,13 +36,10 @@ function setScreenListeners() {
 }
 
 async function getScreenDetailsWithWarningAndFallback(requestPermission = false) {
-  if ('getScreens' in self || 'getScreenDetails' in self) {
+  if ('getScreenDetails' in self) {
     if (!screenDetails && ((permissionStatus && permissionStatus.state === 'granted') ||
                            (permissionStatus && permissionStatus.state === 'prompt' && requestPermission))) {
-      if ('getScreenDetails' in self)
-        screenDetails = await getScreenDetails().catch((e)=>{ console.error(e); return null; });
-      else if ('getScreens' in self)
-        screenDetails = await getScreens().catch((e)=>{ console.error(e); return null; });
+      screenDetails = await getScreenDetails().catch(e =>{ console.error(e); return null; });
       if (screenDetails) {
         screenDetails.addEventListener('screenschange', () => { updateScreens(/*requestPermission=*/false); setScreenListeners(); });
         setScreenListeners();
@@ -417,8 +414,8 @@ async function delegateFullscreen(w, screenId) {
 // Also move this popup to another screen as needed to avoid being covered.
 async function fullscreenOpenerAndMoveThisPopup(screenId = null) {
   const screens = await getScreenDetailsWithWarningAndFallback();
-  // This function requires multiple screens, transient user activation, and an opener.
-  if (screens.length < 2 || !navigator.userActivation.isActive || !opener || opener.closed)
+  // This function requires transient user activation, and an opener.
+  if (!navigator.userActivation.isActive || !opener || opener.closed)
     return;
   // Make the opener fullscreen on the specified target screen, or this window's screen.
   if (!Number.isInteger(screenId) || screenId < 0 || screenId >= screens.length)
@@ -429,8 +426,8 @@ async function fullscreenOpenerAndMoveThisPopup(screenId = null) {
   // Delegate this window's transient user activation so the opener can request fullscreen.
   // Wait for the opener to actually move to the target screen if it reports successful delegation.
   if (await delegateFullscreen(opener, screenId) && await ensureWindowIsOnScreen(opener, screenId)) {
-    // If the opener was made fullscreen on the same screen as this popup.
-    if (screens[screenId] === screenDetails.currentScreen) {
+    // If the opener was made fullscreen on the same screen as this popup and there's another screen.
+    if (screens[screenId] === screenDetails.currentScreen && screens.length > 1) {
       // Move this popup to the opener's previous screen, or the next available screen.
       const popupTargetScreenId = (screens[openerId] === screenDetails.currentScreen) ? ((openerId + 1) % screens.length) : openerId;
       await movePopupToScreen(window, popupTargetScreenId);

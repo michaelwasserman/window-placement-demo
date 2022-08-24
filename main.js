@@ -4,6 +4,7 @@ let permissionStatus = null;
 let screenDetails = null;
 let popup = null;
 let popupObserverInterval = null;
+let handlingMultiScreenRequest = false;
 
 function showWarning(text) {
   const warning = document.getElementById('warning');
@@ -312,13 +313,21 @@ async function handleWindowKeyup(keyEvent) {
   } else if (keyEvent.code === "Enter" && openWindowControls && openWindowControls.contains(keyEvent.target)) {
     openWindow();  // Open a window when on [Enter] targeting an "Open window" input element.
   } else if (keyEvent.code === "KeyS" && screen.isExtended) {
+    // Bail to avoid issuing concurrent conflicting asynchronous multi-screen requests.
+    // Browsers may drop fullscreen for security if popup and fullscreen displays coincide.
+    if (handlingMultiScreenRequest) {
+      console.log("INFO: Throttling multi-screen placement requests");
+      return;
+    }
+    handlingMultiScreenRequest = true;
     // Initiate a fullscreen + popup multi-screen experience, or swap their screens on [s].
     if (popup && !popup.closed)
-      fullscreenThisWindowAndMovePopup();
+      await fullscreenThisWindowAndMovePopup();
     else if (opener && !opener.closed)
-      fullscreenOpenerAndMoveThisPopup();
+      await fullscreenOpenerAndMoveThisPopup();
     else if (document.getElementById("slideIframe"))
-      fullscreenSlideAndOpenNotesWindow();
+      await fullscreenSlideAndOpenNotesWindow();
+    handlingMultiScreenRequest = false;
   }
 }
 
@@ -390,10 +399,11 @@ async function fullscreenThisWindowAndMovePopup() {
 
   const element = document.fullscreenElement ? document.fullscreenElement : document.documentElement;
   await toggleElementFullscreen(element, fullscreenTargetId);
-  await ensureWindowIsOnScreen(window, fullscreenTargetId);
-
-  const popupTargetScreenId = (screens[fullscreenId] === screenDetails.currentScreen) ? ((fullscreenId + 1) % screens.length) : fullscreenId;
-  await movePopupToScreen(popup, popupTargetScreenId);
+  if (await ensureWindowIsOnScreen(window, fullscreenTargetId)) {
+    const popupTargetScreenId = (screens[fullscreenId] === screenDetails.currentScreen) ? ((fullscreenId + 1) % screens.length) : fullscreenId;
+    await movePopupToScreen(popup, popupTargetScreenId);
+    await ensureWindowIsOnScreen(popup, popupTargetScreenId);
+  }
 }
 
 async function delegateFullscreen(w, screenId) {

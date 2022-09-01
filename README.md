@@ -3,7 +3,7 @@
 ## Abstract
 
 This is a basic demo of
-[Multi-Screen Window Placement](https://github.com/w3c/window-placement) APIs.
+[Multi-Screen Window Placement](https://www.w3.org/TR/window-placement/) APIs.
 * Visualize the set of connected displays
 * Open or move a popup window onto any connected display
 * Request fullscreen on any connected display

@@ -37,6 +37,6 @@ $ out/cros_Default/chrome --ash-host-window-bounds=1280x960,1285+0-1280x960 -- "
 
 ## Screen Capture
 
-An older demo screen capture: linux-chromeos with two virtual displays draws a screen-space diagram and opens windows on both displays
+This screen capture shows some recent enhancements on linux-chromeos with two virtual displays
 
-<a href="demo_screen_capture.webm"><img src="demo_screen_capture.png" alt="Demo Screen Capture - linux-chromeos with two virtual displays" width="1200"></a>
+<a href="enhancement_screen_capture.webm"><img src="enhancement_screen_capture.png" alt="Enhancement Screen Capture - linux-chromeos with two virtual displays" width="1200"></a>

@@ -210,6 +210,7 @@ async function toggleElementFullscreen(element, screenId) {
   if (Number.isInteger(screenId) && screenId >= 0 && screenId < screens.length) {
     console.log('INFO: Requesting fullscreen on screen: ' + screenId);
     await element.requestFullscreen({ screen: screens[screenId] });
+    await ensureWindowIsOnScreen(window, screenId);
   } else if (document.fullscreenElement == element) {
     console.log('INFO: Exiting fullscreen');
     document.exitFullscreen();

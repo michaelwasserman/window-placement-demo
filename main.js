@@ -213,7 +213,7 @@ async function toggleElementFullscreen(element, screenId) {
     await ensureWindowIsOnScreen(window, screenId);
   } else if (document.fullscreenElement == element) {
     console.log('INFO: Exiting fullscreen');
-    document.exitFullscreen();
+    await document.exitFullscreen();
   } else {
     console.log('INFO: Requesting fullscreen');
     await element.requestFullscreen();
@@ -277,6 +277,10 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
   if (!Number.isInteger(screenId) || screenId < 0 || screenId >= screens.length)
     screenId = 0;
   await fullscreenSlide(screenId);
+  // Find the screen where the window was actually made fullscreen. This may not
+  // match the request if the window was made fullscreen within the tab area,
+  // which happens when the tab content is being captured for video streaming.
+  screenId = screenDetails.screens.indexOf(screenDetails.currentScreen);
   const notesWindow = await openNotesWindow(screenId == 0 ? 1 : 0);
   if (notesWindow) {
     const interval = setInterval(() => {
@@ -380,6 +384,7 @@ async function movePopupToScreen(p, screenId) {
     const l = s.left + Math.round(s.width - w) / 2;
     const t = s.top + Math.round(s.height - h) / 2;
     p.moveTo(l, t);
+    await ensureWindowIsOnScreen(p, screenId);
   }
 }
 
@@ -401,9 +406,9 @@ async function fullscreenThisWindowAndMovePopup() {
   const element = document.fullscreenElement ? document.fullscreenElement : document.documentElement;
   await toggleElementFullscreen(element, fullscreenTargetId);
   if (await ensureWindowIsOnScreen(window, fullscreenTargetId)) {
-    const popupTargetScreenId = (screens[fullscreenId] === screenDetails.currentScreen) ? ((fullscreenId + 1) % screens.length) : fullscreenId;
-    await movePopupToScreen(popup, popupTargetScreenId);
-    await ensureWindowIsOnScreen(popup, popupTargetScreenId);
+    // Move the popup to this window's previous screen, or the next available screen.
+    const popupTargetId = (screens[fullscreenId] === screenDetails.currentScreen) ? ((fullscreenId + 1) % screens.length) : fullscreenId;
+    await movePopupToScreen(popup, popupTargetId);
   }
 }
 
@@ -440,8 +445,8 @@ async function fullscreenOpenerAndMoveThisPopup(screenId = null) {
     // If the opener was made fullscreen on the same screen as this popup and there's another screen.
     if (screens[screenId] === screenDetails.currentScreen && screens.length > 1) {
       // Move this popup to the opener's previous screen, or the next available screen.
-      const popupTargetScreenId = (screens[openerId] === screenDetails.currentScreen) ? ((openerId + 1) % screens.length) : openerId;
-      await movePopupToScreen(window, popupTargetScreenId);
+      const popupTargetId = (screens[openerId] === screenDetails.currentScreen) ? ((openerId + 1) % screens.length) : openerId;
+      await movePopupToScreen(window, popupTargetId);
     }
   }
 }

@@ -21,12 +21,3 @@ input { margin:5px; }
 }
 .dropdown:hover .dropdownContent { display:block; }
 .dropdown:focus-within .dropdownContent { display:block; }
-
-#demoConfigContainer {
-  font-size: 12px;
-  margin: 5px 0px;
-  text-align: right;
-  width: 800px;
-  padding: 5px;
-  background: #e8e8e8;
-}

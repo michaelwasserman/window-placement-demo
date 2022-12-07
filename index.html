@@ -9,15 +9,6 @@
 <body>
 <h3>Multi-Screen Window Placement Demo (<a href="https://github.com/michaelwasserman/window-placement-demo">GitHub</a>, <a href="https://www.chromestatus.com/feature/5252960583942144">ChromeStatus</a>)</h3>
 <h4 id="warning" hidden=true style="color: red;"></h4>
-<div id="demoConfigContainer">
-  Permission string / policy:
-  <select id="permissionSelect">
-    <option value="window-placement">window-placement</option>
-    <option value="window-management">window-management</option>
-  </select>
-  <label for="testIframes">Show iframes</label>
-  <input type="checkbox" id="testIframes" value="true">
-</div>
 <div class="controls">
   <div id="openWindowControls" style="display:flex; align-items:center;">
     <button id="openWindowButton">Open window</button>
@@ -50,18 +41,14 @@
     <button id="fullscreenSlideAndOpenNotesWindowButton">Fullscreen slide and open notes</button>
     <div class="dropdownContent" hidden=true id="fullscreenSlideAndOpenNotesWindowDropdown"></div>
   </div>
-
 </div>
 <p></p>
 <canvas id="screensCanvas" width="800" height="600" style="border-style: solid"></canvas>
-<div style="display: none" id="iframes">
-
-  <iframe id="nestedIframe" src="https://michaelwasserman.github.io/window-placement-demo/" style="width:800; height:600;" allow="fullscreen;window-placement"></iframe>
-  <iframe id="permissionSiteIframe" src="https://permission.site" style="width:800; height:600;" allow="fullscreen;geolocation;window-placement"></iframe>
+<!-- Testing of iframe functionality and permissions:
+  <iframe src="https://michaelwasserman.github.io/window-placement-demo/" style="width:800; height:600;" allow="fullscreen;window-placement"></iframe>
+  <iframe src="https://permission.site" style="width:800; height:600;" allow="fullscreen;geolocation;window-placement"></iframe>
   <iframe src="about:blank" style="width:800; height:600;" allow="window-placement none"></iframe>
-
-</div>
-
+-->
 </body>
 <script src="main.js"></script>
 <script>
@@ -83,19 +70,6 @@ window.addEventListener('load', () => {
   openSlideAndNotesWindowsButton.addEventListener('click', openSlideAndNotesWindows);
   fullscreenSlideButton.addEventListener('click', fullscreenSlide);
   fullscreenSlideAndOpenNotesWindowButton.addEventListener('click', fullscreenSlideAndOpenNotesWindow);
-
-  // iframe and permission string configuration.
-  document.location.hash
-  nestedIframe.src = window.location.href; // Copy URL with hash tag to iframe source.
-  permissionSelect.value = getPermissionString();
-  for(const iframe of [nestedIframe, permissionSiteIframe]) {
-  iframe.setAttribute("allow",
-    iframe.getAttribute('allow').replace('window-placement', permissionSelect.value));
-  }
-  permissionSelect.addEventListener("change", (e) => setPermissionString(permissionSelect.value));
-  testIframes.addEventListener("change", (e) => iframes.style.display = testIframes.checked ? 'block' : 'none');
-
-  
 });
 </script>
 </html>

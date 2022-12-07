@@ -16,26 +16,13 @@ function showWarning(text) {
   }
 }
 
-// Returns the permission string to used (useful for testing the migration on crbug.com/1328581)
-// Can specify the permission string in the URL like: 
-// https://michaelwasserman.github.io/window-placement-demo/#window-management
-function getPermissionString() {
-  return document.location.hash.replace('#','') || 'window-placement';
-}
-// Sets the permission string and reloads the page.
-function setPermissionString(val) {
-  window.location.href = window.location.href.replace(document.location.hash, '') + "#" + val;
-  window.location.reload(true);
-}
-
 window.addEventListener('load', async () => {
   if (!('getScreenDetails' in self) || !('isExtended' in screen) || !('onchange' in screen)) {
     showWarning("Please try a browser that supports multi-screen features; see the <a href='https://github.com/michaelwasserman/window-placement-demo#instructions'>demo instructions</a>");
   } else {
     screen.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
     window.addEventListener('resize', () => { updateScreens(/*requestPermission=*/false); });
-    console.log(getPermissionString());
-    permissionStatus = await navigator.permissions.query({name:getPermissionString()});
+    permissionStatus = await navigator.permissions.query({name:'window-placement'});
     permissionStatus.addEventListener('change', (p) => { permissionStatus = p; updateScreens(/*requestPermission=*/false); });
   }
   updateScreens(/*requestPermission=*/false);

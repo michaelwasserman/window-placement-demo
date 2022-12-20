@@ -277,6 +277,11 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
   if (!Number.isInteger(screenId) || screenId < 0 || screenId >= screens.length)
     screenId = 0;
   await fullscreenSlide(screenId);
+  // Await potential async fullscreen space transitions. If the Mac preference
+  // "Displays have separate Spaces" is disabled, then opening a popup window
+  // while the target display is transitioning to another space may put the
+  // window in the wrong space (i.e. it won't be visible). See crbug.com/1401041
+  await new Promise(r => setTimeout(r, 500));
   // Find the screen where the window was actually made fullscreen. This may not
   // match the request if the window was made fullscreen within the tab area,
   // which happens when the tab content is being captured for video streaming.

@@ -162,12 +162,29 @@ function openWindow(options = null) {
       height: openWindowHeightInput.value,
     };
   }
+  // Workaround improper handling of (0,0) locations crbug.com/1392876.
+  const workaround_placement_at_origin = options.x == 0 && options.y == 0;
+  if (workaround_placement_at_origin) {
+    options.x++;
+    // Note: Only needed if this matches the target display's availWidth.
+    options.width--;
+  }
   if (popupObserverInterval)
     clearInterval(popupObserverInterval);
   const features = getFeaturesFromOptions(options);
   popup = window.open(options.url, '_blank', features);
   console.log('INFO: Requested popup with features: "' + features + '" result: ' + popup);
   if (popup) {
+    if (workaround_placement_at_origin) {
+      popup.addEventListener('load', () => {
+          // setTimeout(() => {  // Popup window bounds observed uninitialized infrequently?  
+            console.log(`Adjusting window ${popup.screenX},${popup.screenY} ${popup.outerWidth}x${popup.outerHeight} on screen ${popup.screen.availLeft},${popup.screen.availTop} ${popup.screen.availWidth}x${popup.screen.availHeight}`); 
+            popup.moveTo(0, 0);
+            popup.resizeBy(1, 0);
+            console.log(`Adjusted ${popup.screenX},${popup.screenY} ${popup.outerWidth}x${popup.outerHeight} on screen ${popup.screen.availLeft},${popup.screen.availTop} ${popup.screen.availWidth}x${popup.screen.availHeight}`); 
+          // }, 300);
+        }, {once: true});
+    }
     popupObserverInterval = setInterval(() => {
       if (popup.closed) {
         console.log('INFO: The latest-opened popup was closed');
@@ -281,7 +298,7 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
   // "Displays have separate Spaces" is disabled, then opening a popup window
   // while the target display is transitioning to another space may put the
   // window in the wrong space (i.e. it won't be visible). See crbug.com/1401041
-  await new Promise(r => setTimeout(r, 500));
+  await new Promise(r => setTimeout(r, 700));
   // Find the screen where the window was actually made fullscreen. This may not
   // match the request if the window was made fullscreen within the tab area,
   // which happens when the tab content is being captured for video streaming.

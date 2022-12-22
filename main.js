@@ -166,7 +166,6 @@ function openWindow(options = null) {
   const workaround_placement_at_origin = options.x == 0 && options.y == 0;
   if (workaround_placement_at_origin) {
     options.x++;
-    // Note: Only needed if this matches the target display's availWidth.
     options.width--;
   }
   if (popupObserverInterval)
@@ -175,16 +174,8 @@ function openWindow(options = null) {
   popup = window.open(options.url, '_blank', features);
   console.log('INFO: Requested popup with features: "' + features + '" result: ' + popup);
   if (popup) {
-    if (workaround_placement_at_origin) {
-      popup.addEventListener('load', () => {
-          // setTimeout(() => {  // Popup window bounds observed uninitialized infrequently?  
-            console.log(`Adjusting window ${popup.screenX},${popup.screenY} ${popup.outerWidth}x${popup.outerHeight} on screen ${popup.screen.availLeft},${popup.screen.availTop} ${popup.screen.availWidth}x${popup.screen.availHeight}`); 
-            popup.moveTo(0, 0);
-            popup.resizeBy(1, 0);
-            console.log(`Adjusted ${popup.screenX},${popup.screenY} ${popup.outerWidth}x${popup.outerHeight} on screen ${popup.screen.availLeft},${popup.screen.availTop} ${popup.screen.availWidth}x${popup.screen.availHeight}`); 
-          // }, 300);
-        }, {once: true});
-    }
+    if (workaround_placement_at_origin)
+      popup.addEventListener('load', () => { popup.moveTo(0, 0); popup.resizeBy(1, 0); }, {once: true});
     popupObserverInterval = setInterval(() => {
       if (popup.closed) {
         console.log('INFO: The latest-opened popup was closed');

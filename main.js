@@ -149,7 +149,7 @@ async function updateScreens(requestPermission = true) {
 
 function getFeaturesFromOptions(options) {
   return "left=" + options.x + ",top=" + options.y +
-         ",width=" + options.width + ",height=" + options.height;
+         ",width=" + options.width + ",height=" + options.height + (options.fullscreen ? ",fullscreen" : "");
 }
 
 function openWindow(options = null) {
@@ -160,6 +160,7 @@ function openWindow(options = null) {
       y: openWindowTopInput.value,
       width: openWindowWidthInput.value,
       height: openWindowHeightInput.value,
+      fullscreen: fullscreenPopupInput.checked
     };
   }
   if (popupObserverInterval)

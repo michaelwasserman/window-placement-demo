@@ -2,10 +2,8 @@
 
 ## Abstract
 
-This is a demo of [Multi-Screen Window Placement](https://w3c.github.io/window-placement/) APIs,
-which launched in Chrome 100 ([ChromeStatus](https://chromestatus.com/feature/5252960583942144))
-
-This also demos some more recent API enhancements:
+This is a demo of [Window Management](https://w3c.github.io/window-management/) APIs,
+which launched in Chrome 100 ([ChromeStatus](https://chromestatus.com/feature/5252960583942144)), and some enhancements:
 * Fullscreen Companion Window launched in Chrome M104 ([ChromeStatus](https://chromestatus.com/feature/5173162437246976))
 * Fullscreen Capability Delegation launched in Chrome M104 ([ChromeStatus](https://chromestatus.com/feature/6441688242323456))
 * Accurate Screen Labels launched in Chrome M105 ([ChromeStatus](https://chromestatus.com/feature/6317530778959872)) 
@@ -37,6 +35,6 @@ $ out/cros_Default/chrome --ash-host-window-bounds=1280x960,1285+0-1280x960 -- "
 
 ## Screen Capture
 
-This screen capture shows some recent enhancements on linux-chromeos with two virtual displays
+This screen capture shows some functionality on linux-chromeos with two virtual displays
 
 <a href="enhancement_screen_capture.webm"><img src="enhancement_screen_capture.png" alt="Enhancement Screen Capture - linux-chromeos with two virtual displays" width="1200"></a>

@@ -22,7 +22,7 @@ window.addEventListener('load', async () => {
   } else {
     screen.addEventListener('change', () => { updateScreens(/*requestPermission=*/false); });
     window.addEventListener('resize', () => { updateScreens(/*requestPermission=*/false); });
-    permissionStatus = await navigator.permissions.query({name:'window-placement'});
+    permissionStatus = await navigator.permissions.query({name:'window-management'});
     permissionStatus.addEventListener('change', (p) => { permissionStatus = p; updateScreens(/*requestPermission=*/false); });
   }
   updateScreens(/*requestPermission=*/false);
@@ -51,7 +51,7 @@ async function getScreenDetailsWithWarningAndFallback(requestPermission = false)
     else if (screenDetails && screenDetails.screens.length == 1)
       showWarning("Please extend your desktop over multiple screens for full demo functionality");
     else if (requestPermission || permissionStatus.state === 'denied')
-      showWarning("Please allow the Window Placement permission for full demo functionality");
+      showWarning("Please allow the Window Management permission for full demo functionality");
 
     if (screenDetails) {
       // console.log("INFO: Detected " + screenDetails.screens.length + " screens:");
@@ -164,20 +164,12 @@ function openWindow(options = null) {
       fullscreen: fullscreenPopupInput.checked
     };
   }
-  // Workaround improper handling of (0,0) locations crbug.com/1392876.
-  const workaround_placement_at_origin = options.x == 0 && options.y == 0;
-  if (workaround_placement_at_origin) {
-    options.x++;
-    options.width--;
-  }
   if (popupObserverInterval)
     clearInterval(popupObserverInterval);
   const features = getFeaturesFromOptions(options);
   popup = window.open(options.url, '_blank', features);
   console.log('INFO: Requested popup with features: "' + features + '" result: ' + popup);
   if (popup) {
-    if (workaround_placement_at_origin)
-      popup.addEventListener('load', () => { popup.moveTo(0, 0); popup.resizeBy(1, 0); }, {once: true});
     popupObserverInterval = setInterval(() => {
       if (popup.closed) {
         console.log('INFO: The latest-opened popup was closed');

@@ -7,6 +7,8 @@ which launched in Chrome 100 ([ChromeStatus](https://chromestatus.com/feature/52
 * Fullscreen Companion Window launched in Chrome M104 ([ChromeStatus](https://chromestatus.com/feature/5173162437246976))
 * Fullscreen Capability Delegation launched in Chrome M104 ([ChromeStatus](https://chromestatus.com/feature/6441688242323456))
 * Accurate Screen Labels launched in Chrome M105 ([ChromeStatus](https://chromestatus.com/feature/6317530778959872)) 
+* Fullscreen Popups are available with a flag in Chrome M113+ ([ChromeStatus](https://chromestatus.com/feature/6002307972464640)) 
+  * Enable chrome://flags/#fullscreen-popup-windows to demo this functionality
 
 ## Instructions
 

@@ -129,6 +129,11 @@ async function updateScreens(requestPermission = true) {
     for (let i = 0; i < screens.length; ++i)
       toggleFullscreenDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="toggleFullscreen(${i})"> Screen ${i}</button>`;
   }
+  if (document.getElementById('fullscreenPopupDropdown')) {
+    fullscreenPopupDropdown.innerHTML = ``;
+    for (let i = 0; i < screens.length; ++i)
+      fullscreenPopupDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="fullscreenPopup(${i})"> Screen ${i}</button>`;
+  }
   if (document.getElementById('fullscreenSlideDropdown')) {
     fullscreenSlideDropdown.innerHTML = ``;
     for (let i = 0; i < screens.length; ++i)
@@ -161,7 +166,7 @@ function openWindow(options = null) {
       y: openWindowTopInput.value,
       width: openWindowWidthInput.value,
       height: openWindowHeightInput.value,
-      fullscreen: fullscreenPopupInput.checked
+      fullscreen: openWindowFullscreenInput.checked
     };
   }
   if (popupObserverInterval)
@@ -185,14 +190,15 @@ function openWindow(options = null) {
 // TODO: Add some worthwhile multi-window opening example?
 // async function openWindows() {
 //   let count = openWindowsCountInput.value;
+//   let popups = [];
 //   const screens = await getScreenDetailsWithWarningAndFallback();
 //   const perScreen = Math.ceil(count / screens.length);
 //   console.log(`openWindows count:${count}, screens:${screens.length}, perScreen:${perScreen}`);
 //   for (const s of screens) {
 //     const cols = Math.ceil(Math.sqrt(perScreen));
 //     const rows = Math.ceil(perScreen / cols);
-//     for (r = 0; r < rows; ++r) {
-//       for (c = 0; c < cols && count-- > 0; ++c) {
+//     for (let r = 0; r < rows; ++r) {
+//       for (let c = 0; c < cols && count-- > 0; ++c) {
 //         const options = {
 //           x: s.availLeft + s.availWidth * c / cols,
 //           y: s.availTop + s.availHeight * r / rows,
@@ -201,10 +207,16 @@ function openWindow(options = null) {
 //         };
 //         const url = `data:text/html;charset=utf-8,<title>row:${r} col:${c}</title><h1>row:${r} col:${c}</h1>`;
 //         console.log(`INFO: opening window row:${r} col:${c}, (${options.x},${options.y} ${options.width}x${options.height}`);
-//         window.open(url, '_blank', getFeaturesFromOptions(options));
+//         popups.push(window.open(url, '_blank', getFeaturesFromOptions(options)));
 //       }
 //     }
 //   }
+//   const interval = setInterval(() => {
+//     if (popups.some(p => p.closed)) {
+//       popups.forEach(p => p.close());
+//       clearInterval(interval);
+//     }
+//   }, 300);
 // }
 
 async function toggleElementFullscreen(element, screenId) {
@@ -226,48 +238,21 @@ async function toggleFullscreen(screenId) {
   await toggleElementFullscreen(document.documentElement, screenId);
 }
 
-async function openSlideWindow(screenId) {
-  const screens = await getScreenDetailsWithWarningAndFallback();
-  let options = { x:screen.availLeft, y:screen.availTop,
-                  width:screen.availWidth, height:screen.availHeight/2 };
-  if (screens.length > 1) {
-    let screen = screens[1];
-    if (Number.isInteger(screenId) && screenId >= 0 && screenId < screens.length)
-      screen = screens[screenId];
-    options = { x:screen.availLeft, y:screen.availTop,
-                width:screen.availWidth, height:screen.availHeight };
-  }
-  options.url = './slide.html';
-  return openWindow(options);
-}
-
 async function openNotesWindow(screenId) {
   const screens = await getScreenDetailsWithWarningAndFallback();
-  let options = { x:screen.availLeft, y:screen.availTop+screen.availHeight/2,
-                  width:screen.availWidth, height:screen.availHeight/2 };
-  if (screens.length > 1) {
-    let screen = screens[0];
-    if (Number.isInteger(screenId) && screenId >= 0 && screenId < screens.length)
-      screen = screens[screenId];
-    options = { x:screen.availLeft, y:screen.availTop,
-                width:screen.availWidth, height:screen.availHeight };
-  }
-  options.url = './notes.html';
+  const s = screens[screenId] || screens[0] || window.screen;
+  const options = { url:'./notes.html', x:s.availLeft, y:s.availTop,
+                    width:s.availWidth, height:s.availHeight };
   return openWindow(options);
 }
 
-async function openSlideAndNotesWindows() {
-  const slideWindow = await openSlideWindow();
-  const notesWindow = await openNotesWindow();
-  if (slideWindow && notesWindow) {
-    const interval = setInterval(() => {
-      if (slideWindow.closed || notesWindow.closed) {
-        slideWindow.close();
-        notesWindow.close();
-        clearInterval(interval);
-      }
-    }, 300);
-  }
+async function fullscreenPopup(screenId) {
+  const screens = await getScreenDetailsWithWarningAndFallback();
+  const s = screens[screenId] || screens[0] || window.screen;
+  const options = { url:'./popup.html', fullscreen: true,
+                    x:s.availLeft, y:s.availTop,
+                    width:s.availWidth, height:s.availHeight };
+  return openWindow(options);
 }
 
 async function fullscreenSlide(screenId) {
@@ -289,7 +274,7 @@ async function fullscreenSlideAndOpenNotesWindow(screenId) {
   // which happens when the tab content is being captured for video streaming.
   screenId = screenDetails.screens.indexOf(screenDetails.currentScreen);
   const notesWindow = await openNotesWindow(screenId == 0 ? 1 : 0);
-  if (notesWindow) {
+  if (notesWindow && screens.length > 1) {
     const interval = setInterval(() => {
       if (!document.fullscreenElement && !notesWindow.closed) {
         notesWindow.close();

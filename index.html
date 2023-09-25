@@ -17,20 +17,17 @@
     <label for="openWindowTopInput">top: </label><input id="openWindowTopInput" style="width:50px;" size=5 value="50" type="number"></input>
     <label for="openWindowWidthInput">width: </label><input id="openWindowWidthInput" style="width:50px;" size=5 value="830" type="number"></input>
     <label for="openWindowHeightInput">height: </label><input id="openWindowHeightInput" style="width:50px;" size=5 value="750" type="number"></input>
-    <label for="fullscreenPopupInput"> fullscreen: </label> <input type="checkbox" id="fullscreenPopupInput" name="fullscreenPopup"><br>
+    <label for="openWindowFullscreenInput">fullscreen: </label><input id="openWindowFullscreenInput" type="checkbox"><br>
   </div>
   <button id="updateScreensButton">Update screens</button>
-  <!-- <button id="openWindowsButton">Open <input id="openWindowsCountInput" style="width:20px;padding:0px;margin:0px" size=2 value="5" type="number" min=1 max=9></input> windows</button> -->
+  <!-- <button id="openWindowsButton">Open <input id="openWindowsCountInput" style="width:25px;padding:0px;margin:0px" size=2 value="2" type="number" min=1 max=9></input> windows</button> -->
   <div class="dropdown">
     <button id="toggleFullscreenButton">Toggle fullscreen</button>
     <div class="dropdownContent" hidden=true id="toggleFullscreenDropdown"></div>
   </div>
   <div class="dropdown">
-    <button id="openSlideAndNotesWindowsButton">Open slide & notes</button>
-    <div class="dropdownContent" hidden=true id="openSlideAndNotesWindowsDropdown">
-      <button id="openSlideWindowButton">Slide window</button>
-      <button id="openNotesWindowButton">Notes window</button>
-    </div>
+    <button id="fullscreenPopupButton">Fullscreen popup</button>
+    <div class="dropdownContent" hidden=true id="fullscreenPopupDropdown"></div>
   </div>
   <div class="dropdown">
     <button id="fullscreenSlideButton">Fullscreen slide
@@ -66,9 +63,7 @@ window.addEventListener('load', () => {
   updateScreensButton.addEventListener('click', updateScreens);
   // openWindowsButton.addEventListener('click', openWindows);
   toggleFullscreenButton.addEventListener('click', toggleFullscreen);
-  openSlideWindowButton.addEventListener('click', openSlideWindow);
-  openNotesWindowButton.addEventListener('click', openNotesWindow);
-  openSlideAndNotesWindowsButton.addEventListener('click', openSlideAndNotesWindows);
+  fullscreenPopupButton.addEventListener('click', fullscreenPopup);
   fullscreenSlideButton.addEventListener('click', fullscreenSlide);
   fullscreenSlideAndOpenNotesWindowButton.addEventListener('click', fullscreenSlideAndOpenNotesWindow);
 });

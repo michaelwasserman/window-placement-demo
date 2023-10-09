@@ -247,7 +247,7 @@ async function openNotesWindow(screenId) {
 }
 
 async function fullscreenPopup(screenId) {
-  const screens = await getScreenDetailsWithWarningAndFallback();
+  const screens = await getScreenDetailsWithWarningAndFallback(/*requestPermission=*/true);
   const s = screens[screenId] || screens[0] || window.screen;
   const options = { url:'./popup.html', fullscreen: true,
                     x:s.availLeft, y:s.availTop,

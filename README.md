@@ -1,23 +1,22 @@
-# Multi-Screen Window Placement Demo
+# Window Management Demo
 
-## Abstract
+This is a demo of [Window Management](https://w3c.github.io/window-management/) web platform APIs:
+* Window Management (nee "Multi-Screen Window Placement") launched in Chrome 100 ([ChromeStatus](https://chromestatus.com/feature/5252960583942144))
+* Fullscreen Companion Window launched in Chrome 104 ([ChromeStatus](https://chromestatus.com/feature/5173162437246976))
+* Fullscreen Capability Delegation launched in Chrome 104 ([ChromeStatus](https://chromestatus.com/feature/6441688242323456))
+* Accurate Screen Labels launched in Chrome 105 ([ChromeStatus](https://chromestatus.com/feature/6317530778959872)) 
+* Fullscreen Popups are running a Chrome 119-122 [Origin Trial](https://developer.chrome.com/blog/fullscreen-popups-origin-trial/) ([ChromeStatus](https://chromestatus.com/feature/6002307972464640)) 
+  * Also available by enabling chrome://flags/#fullscreen-popup-windows in Chrome 113+
 
-This is a demo of [Window Management](https://w3c.github.io/window-management/) APIs,
-which launched in Chrome 100 ([ChromeStatus](https://chromestatus.com/feature/5252960583942144)), and some enhancements:
-* Fullscreen Companion Window launched in Chrome M104 ([ChromeStatus](https://chromestatus.com/feature/5173162437246976))
-* Fullscreen Capability Delegation launched in Chrome M104 ([ChromeStatus](https://chromestatus.com/feature/6441688242323456))
-* Accurate Screen Labels launched in Chrome M105 ([ChromeStatus](https://chromestatus.com/feature/6317530778959872)) 
-* Fullscreen Popups are available with a flag in Chrome M113+ ([ChromeStatus](https://chromestatus.com/feature/6002307972464640)) 
-  * Enable chrome://flags/#fullscreen-popup-windows to demo this functionality
+Functionality includes:
+* Show multi-screen details in a visualized arrangement that updates automatically
+* Place fullscreen content or popup windows on specific screens
+* Request fullscreen and open a popup via 'Fullscreen slide and open notes' (or press the "s" key) with 2+ screens
+* Request fullscreen from another window via 'Fullscreen opener' (or press the "s" key) on a popup
 
 ## Instructions
 
 Run the demo on Chrome 105+ at https://michaelwasserman.github.io/window-placement-demo
-
-* See a screen arrangement visualization that updates on changes
-* Place fullscreen content and windows on specific screens
-* Request fullscreen and open a popup via 'Fullscreen slide an open notes' (or press the "s" key) with 2+ screens
-* Request fullscreen from another window via 'Fullscreen opener' (or press the "s" key) on a popup with 2+ screens
 
 **[Optional]** Host this demo locally and run it:
 ```console

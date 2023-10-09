@@ -1,6 +1,6 @@
 {
-  "name": "Multi-Screen Window Placement Demo",
-  "short_name": "Window Placement Demo",
+  "name": "Window Management Demo",
+  "short_name": "Window Management Demo",
   "icons": [{
       "src": "favicon-512.png",
       "sizes": "512x512",

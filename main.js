@@ -10,7 +10,7 @@ function showWarning(text) {
   const warning = document.getElementById('warning');
   if (warning && warning.innerHTML !== text) {
     if (text)
-      console.error(text);
+      console.warn(text);
     warning.hidden = !text;
     warning.innerHTML = text;
   }
@@ -50,7 +50,7 @@ async function getScreenDetailsWithWarningAndFallback(requestPermission = false)
       showWarning();  // Clear any warning.
     else if (screenDetails && screenDetails.screens.length == 1)
       showWarning("Please extend your desktop over multiple screens for full demo functionality");
-    else if (requestPermission || permissionStatus.state === 'denied')
+    else if (requestPermission || (permissionStatus && permissionStatus.state === 'denied'))
       showWarning("Please allow the Window Management permission for full demo functionality");
 
     if (screenDetails) {

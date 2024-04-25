@@ -19,6 +19,10 @@
     <label for="openWindowHeightInput">height: </label><input id="openWindowHeightInput" style="width:50px;" size=5 value="750" type="number"></input>
   </div>
   <button id="updateScreensButton">Update screens</button>
+  <div class="dropdown">
+    <button id="openPopupButton">Open popup</button>
+    <div class="dropdownContent" hidden=true id="openPopupDropdown"></div>
+  </div>
   <!-- <button id="openWindowsButton">Open <input id="openWindowsCountInput" style="width:25px;padding:0px;margin:0px" size=2 value="2" type="number" min=1 max=9></input> windows</button> -->
   <div class="dropdown">
     <button id="toggleFullscreenButton">Toggle fullscreen</button>
@@ -56,6 +60,7 @@ window.addEventListener('load', () => {
   // Handle control button clicks and input events.
   openWindowButton.addEventListener('click', openWindow);
   updateScreensButton.addEventListener('click', updateScreens);
+  openPopupButton.addEventListener('click', openPopup);
   // openWindowsButton.addEventListener('click', openWindows);
   toggleFullscreenButton.addEventListener('click', toggleFullscreen);
   fullscreenSlideButton.addEventListener('click', fullscreenSlide);

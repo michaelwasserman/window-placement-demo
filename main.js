@@ -124,7 +124,12 @@ async function updateScreens(requestPermission = true) {
   if (document.getElementById('screensCanvas'))
     showScreens(screens);
 
-  if (document.getElementById('toggleFullscreenDropdown')) {
+    if (document.getElementById('openPopupDropdown')) {
+      openPopupDropdown.innerHTML = ``;
+      for (let i = 0; i < screens.length; ++i)
+        openPopupDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="openPopup(${i})"> Screen ${i}</button>`;
+    }
+    if (document.getElementById('toggleFullscreenDropdown')) {
     toggleFullscreenDropdown.innerHTML = ``;
     for (let i = 0; i < screens.length; ++i)
       toggleFullscreenDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="toggleFullscreen(${i})"> Screen ${i}</button>`;
@@ -235,6 +240,14 @@ async function openNotesWindow(screenId) {
   const screens = await getScreenDetailsWithWarningAndFallback();
   const s = screens[screenId] || screens[0] || window.screen;
   const options = { url:'./notes.html', x:s.availLeft, y:s.availTop,
+                    width:s.availWidth, height:s.availHeight };
+  return openWindow(options);
+}
+
+async function openPopup(screenId) {
+  const screens = await getScreenDetailsWithWarningAndFallback(/*requestPermission=*/true);
+  const s = screens[screenId] || screens[0] || window.screen;
+  const options = { url:'./popup.html', x:s.availLeft, y:s.availTop,
                     width:s.availWidth, height:s.availHeight };
   return openWindow(options);
 }

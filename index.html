@@ -25,10 +25,6 @@
     <div class="dropdownContent" hidden=true id="toggleFullscreenDropdown"></div>
   </div>
   <div class="dropdown">
-    <button id="fullscreenPopupButton">Fullscreen popup</button>
-    <div class="dropdownContent" hidden=true id="fullscreenPopupDropdown"></div>
-  </div>
-  <div class="dropdown">
     <button id="fullscreenSlideButton">Fullscreen slide
       <iframe id="slideIframe" class="slide" src="./slide.html"></iframe>
     </button>
@@ -62,7 +58,6 @@ window.addEventListener('load', () => {
   updateScreensButton.addEventListener('click', updateScreens);
   // openWindowsButton.addEventListener('click', openWindows);
   toggleFullscreenButton.addEventListener('click', toggleFullscreen);
-  fullscreenPopupButton.addEventListener('click', fullscreenPopup);
   fullscreenSlideButton.addEventListener('click', fullscreenSlide);
   fullscreenSlideAndOpenNotesWindowButton.addEventListener('click', fullscreenSlideAndOpenNotesWindow);
 });

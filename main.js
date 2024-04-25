@@ -129,11 +129,6 @@ async function updateScreens(requestPermission = true) {
     for (let i = 0; i < screens.length; ++i)
       toggleFullscreenDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="toggleFullscreen(${i})"> Screen ${i}</button>`;
   }
-  if (document.getElementById('fullscreenPopupDropdown')) {
-    fullscreenPopupDropdown.innerHTML = ``;
-    for (let i = 0; i < screens.length; ++i)
-      fullscreenPopupDropdown.innerHTML += screens[i] == window.screen ? `` : `<button onclick="fullscreenPopup(${i})"> Screen ${i}</button>`;
-  }
   if (document.getElementById('fullscreenSlideDropdown')) {
     fullscreenSlideDropdown.innerHTML = ``;
     for (let i = 0; i < screens.length; ++i)
@@ -154,8 +149,7 @@ async function updateScreens(requestPermission = true) {
 
 function getFeaturesFromOptions(options) {
   return "left=" + options.x + ",top=" + options.y +
-         ",width=" + options.width + ",height=" + options.height +
-         (options.fullscreen ? ",fullscreen" : "");
+         ",width=" + options.width + ",height=" + options.height;
 }
 
 function openWindow(options = null) {
@@ -165,8 +159,7 @@ function openWindow(options = null) {
       x: openWindowLeftInput.value,
       y: openWindowTopInput.value,
       width: openWindowWidthInput.value,
-      height: openWindowHeightInput.value,
-      fullscreen: openWindowFullscreenInput.checked
+      height: openWindowHeightInput.value
     };
   }
   if (popupObserverInterval)
@@ -242,15 +235,6 @@ async function openNotesWindow(screenId) {
   const screens = await getScreenDetailsWithWarningAndFallback();
   const s = screens[screenId] || screens[0] || window.screen;
   const options = { url:'./notes.html', x:s.availLeft, y:s.availTop,
-                    width:s.availWidth, height:s.availHeight };
-  return openWindow(options);
-}
-
-async function fullscreenPopup(screenId) {
-  const screens = await getScreenDetailsWithWarningAndFallback(/*requestPermission=*/true);
-  const s = screens[screenId] || screens[0] || window.screen;
-  const options = { url:'./popup.html', fullscreen: true,
-                    x:s.availLeft, y:s.availTop,
                     width:s.availWidth, height:s.availHeight };
   return openWindow(options);
 }

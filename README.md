@@ -5,14 +5,15 @@ This is a demo of [Window Management](https://w3c.github.io/window-management/) 
 * Fullscreen Companion Window launched in Chrome 104 ([ChromeStatus](https://chromestatus.com/feature/5173162437246976))
 * Fullscreen Capability Delegation launched in Chrome 104 ([ChromeStatus](https://chromestatus.com/feature/6441688242323456))
 * Accurate Screen Labels launched in Chrome 105 ([ChromeStatus](https://chromestatus.com/feature/6317530778959872)) 
-* Fullscreen Popups are running a Chrome 119-122 [Origin Trial](https://developer.chrome.com/blog/fullscreen-popups-origin-trial/) ([ChromeStatus](https://chromestatus.com/feature/6002307972464640)) 
-  * Also available by enabling chrome://flags/#fullscreen-popup-windows in Chrome 113+
 
 Functionality includes:
 * Show multi-screen details in a visualized arrangement that updates automatically
 * Place fullscreen content or popup windows on specific screens
 * Request fullscreen and open a popup via 'Fullscreen slide and open notes' (or press the "s" key) with 2+ screens
 * Request fullscreen from another window via 'Fullscreen opener' (or press the "s" key) on a popup
+
+Related work:
+* [iwa-windowing-example](https://github.com/michaelwasserman/iwa-windowing-example) demonstrates [HTML Fullscreen Without A Gesture](https://github.com/explainers-by-googlers/html-fullscreen-without-a-gesture)
 
 ## Instructions
 

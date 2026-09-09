@@ -217,9 +217,9 @@ function openWindow(options = null) {
 //   }, 300);
 // }
 
-async function toggleElementFullscreen(element, screenId) {
+async function toggleElementFullscreen(element, screenId = -1) {
   const screens = await getScreenDetailsWithWarningAndFallback();
-  if (Number.isInteger(screenId) && screenId >= 0 && screenId < screens.length) {
+  if (screenDetails && Number.isInteger(screenId) && screenId >= 0 && screenId < screens.length) {
     console.log('INFO: Requesting fullscreen on screen: ' + screenId);
     await element.requestFullscreen({ screen: screens[screenId] });
     await ensureWindowIsOnScreen(window, screenId);
@@ -326,7 +326,11 @@ async function handleWindowKeyup(keyEvent) {
 }
 
 async function isWindowOnScreen(w, screenId) {
-  const windowScreenDetails = await w.getScreenDetails();
+  if (!Number.isInteger(screenId) || screenId < 0)
+    return true;
+  const windowScreenDetails = await w.getScreenDetails().catch(() => null);
+  if (!windowScreenDetails || !windowScreenDetails.screens[screenId])
+    return false;
   const screen = windowScreenDetails.screens[screenId];
   const center = { x: w.screenLeft + w.outerWidth / 2,
                    y: w.screenTop + w.outerHeight / 2 };
@@ -345,6 +349,8 @@ async function waitForWindowOnScreen(w, screenId, resolve, timestamp = Date.now(
 }
 
 async function ensureWindowIsOnScreen(w, screenId) {
+  if (!Number.isInteger(screenId) || screenId < 0)
+    return true;
   return new Promise(resolve => { waitForWindowOnScreen(w, screenId, resolve); });
 }
 
@@ -401,7 +407,7 @@ async function fullscreenThisWindowAndMovePopup() {
   }
 }
 
-async function delegateFullscreen(w, screenId) {
+async function delegateFullscreen(w, screenId = -1) {
   return new Promise((resolve) => {
     console.log('INFO: Requesting to delegate a fullscreen request capability');
     window.addEventListener('message', (messageEvent) => {
@@ -415,27 +421,33 @@ async function delegateFullscreen(w, screenId) {
   });
 }
 
-// Make the opener fullscreen on the target screen (or this popup's screen, or a fallback).
+// Make the opener fullscreen on the target screen (or its own screen, as a fallback).
 // Also move this popup to another screen as needed to avoid being covered.
-async function fullscreenOpenerAndMoveThisPopup(screenId = null) {
+async function fullscreenOpenerAndMoveThisPopup(screenId = -1) {
   const screens = await getScreenDetailsWithWarningAndFallback();
   // This function requires transient user activation, and an opener.
   if (!navigator.userActivation.isActive || !opener || opener.closed)
     return;
-  // Make the opener fullscreen on the specified target screen, or this window's screen.
+  // Make the opener fullscreen on the specified target screen, or its own screen.
   if (!Number.isInteger(screenId) || screenId < 0 || screenId >= screens.length)
-    screenId = screens.indexOf(screenDetails.currentScreen);
-  const openerScreenDetails = await opener.getScreenDetails();
-  const openerId = openerScreenDetails.screens.indexOf(openerScreenDetails.currentScreen);
+    screenId = -1;
 
   // Delegate this window's transient user activation so the opener can request fullscreen.
   // Wait for the opener to actually move to the target screen if it reports successful delegation.
   if (await delegateFullscreen(opener, screenId) && await ensureWindowIsOnScreen(opener, screenId)) {
     // If the opener was made fullscreen on the same screen as this popup and there's another screen.
-    if (screens[screenId] === screenDetails.currentScreen && screens.length > 1) {
-      // Move this popup to the opener's previous screen, or the next available screen.
-      const popupTargetId = (screens[openerId] === screenDetails.currentScreen) ? ((openerId + 1) % screens.length) : openerId;
-      await movePopupToScreen(window, popupTargetId);
+    if (screenDetails && screens.length > 1) {
+      let openerId = screenId;
+      if (openerId < 0 && 'getScreenDetails' in opener) {
+        const openerScreenDetails = await opener.getScreenDetails().catch(() => null);
+        if (openerScreenDetails)
+          openerId = openerScreenDetails.screens.indexOf(openerScreenDetails.currentScreen);
+      }
+      if (openerId >= 0 && screens[openerId] === screenDetails.currentScreen) {
+        // Move this popup to another available screen.
+        const popupTargetId = (openerId + 1) % screens.length;
+        await movePopupToScreen(window, popupTargetId);
+      }
     }
   }
 }
